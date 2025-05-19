@@ -125,8 +125,8 @@ char* vigenereMem(const char* inputFileName,const char* key,const size_t keyLen,
 	size_t currentFileContentLength = 0;
 	size_t newTotalFileContentLength=0;
 	size_t charRead= 0;
-	int bufferSize = 100;
-	char tempBuffer[bufferSize];
+	const int BUFFER_SIZE = 150;
+	char tempBuffer[BUFFER_SIZE];
 
 	//--------- Extracting File Content ----------
 
@@ -142,7 +142,7 @@ char* vigenereMem(const char* inputFileName,const char* key,const size_t keyLen,
 			free(fileContent);														// Free any allocated memory
 			exit(EXIT_FAILURE);
 		}
-		charRead = fread(tempBuffer, sizeof(char), bufferSize, inputFile);
+		charRead = fread(tempBuffer, sizeof(char), BUFFER_SIZE, inputFile);
 		if (!isValidChunk(tempBuffer,charRead)) {
 			free(fileContent);
 			fclose(inputFile);
