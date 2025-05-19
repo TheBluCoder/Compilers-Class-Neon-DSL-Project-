@@ -88,14 +88,11 @@ void vigenereFile(const char* inputFileName, const char* outputFileName, const c
 
 	//---- check the cipher mode -----
 	if (cypherMode == CYPHER) {
-		printf("CYPHER\n");
 		output = vigenereMem(inputFileName,key,keyLen,cypherMode);
-		printf("cypheredValue: %s\n", output);
 	}
 	else if (cypherMode == DECYPHER) {
 		printf("DECYPHER\n");
 		output= vigenereMem(inputFileName,key,keyLen, cypherMode);
-		printf("deciphered Value: %s\n", output);
 	}
 	else {
 		errorPrint("The encode option provided is invalid");
