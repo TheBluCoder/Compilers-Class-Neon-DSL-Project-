@@ -9,23 +9,23 @@
 # ECHO "=---------------------------------------="
 # ECHO "|  COMPILERS - ALGONQUIN COLLEGE (S25)  |"
 # ECHO "=---------------------------------------="
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@           %&@@@@@@@@@@@     @@    ”
-# ECHO "    @@       @%% (@@@@@@@@@  @     @@    ”
-# ECHO "    @@      @& @   @ @       @     @@    ”
-# ECHO "    @@     @ @ %  / /   @@@@@@     @@    ”
-# ECHO "    @@      & @ @  @@              @@    ”
-# ECHO "    @@       @/ @*@ @ @   @        @@    ”
-# ECHO "    @@           @@@@  @@ @ @      @@    ”
-# ECHO "    @@            /@@    @@@ @     @@    ”
-# ECHO "    @@     @      / /     @@ @     @@    ”
-# ECHO "    @@     @ @@   /@/   @@@ @      @@    ”
-# ECHO "    @@     @@@@@@@@@@@@@@@         @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@         S O F I A           @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
+# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ï¿½
+# ECHO "    @@                             @@    ï¿½
+# ECHO "    @@           %&@@@@@@@@@@@     @@    ï¿½
+# ECHO "    @@       @%% (@@@@@@@@@  @     @@    ï¿½
+# ECHO "    @@      @& @   @ @       @     @@    ï¿½
+# ECHO "    @@     @ @ %  / /   @@@@@@     @@    ï¿½
+# ECHO "    @@      & @ @  @@              @@    ï¿½
+# ECHO "    @@       @/ @*@ @ @   @        @@    ï¿½
+# ECHO "    @@           @@@@  @@ @ @      @@    ï¿½
+# ECHO "    @@            /@@    @@@ @     @@    ï¿½
+# ECHO "    @@     @      / /     @@ @     @@    ï¿½
+# ECHO "    @@     @ @@   /@/   @@@ @      @@    ï¿½
+# ECHO "    @@     @@@@@@@@@@@@@@@         @@    ï¿½
+# ECHO "    @@                             @@    ï¿½
+# ECHO "    @@         S O F I A           @@    ï¿½
+# ECHO "    @@                             @@    ï¿½
+# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ï¿½
 # ECHO "                                         "
 # ECHO "[COMPILER SCRIPT .......................]"
 # ECHO "                                         "
@@ -35,7 +35,7 @@
 ************************************************************
 * File name: Compilers.h
 * Compiler: MS Visual Studio 2022
-* Course: CST 8152 – Compilers, Lab Section: [011, 012]
+* Course: CST 8152 ï¿½ Compilers, Lab Section: [011, 012]
 * Assignment: A1-A5.
 * Date: Jan 01 2025
 * Professor: Paulo Sousa
@@ -60,11 +60,11 @@
 
 /* TO_DO: Adjust your language (cannot be "Sofia") */
 /* Language name */
-#define STR_LANGNAME	"Sofia"
+#define STR_LANGNAME	"Neon"
 
 /* Logical constants - adapt for your language */
-#define SOFIA_TRUE  1
-#define SOFIA_FALSE 0
+#define True  1
+#define False 0
 
 #define INVALID NULL
 #define EOF_CHAR '\0'
@@ -78,17 +78,16 @@ NOTE: Some types may not be directly used by your language,
 */
 
 /* TO_DO: Define your typedefs */
-typedef char			sofia_char;
-typedef char*			sofia_strg;
-typedef int				sofia_intg;
-typedef float			sofia_real;
-typedef void			sofia_void;
+// typedef char			sofia_char;
+typedef char*			text;
+typedef unsigned char	boolean;
+// typedef float			sofia_real;
+// typedef void			sofia_void;
 
-typedef unsigned char	sofia_boln;
-typedef unsigned char	sofia_byte;
+// typedef unsigned char	sofia_byte;
 
-typedef long			sofia_long;
-typedef double			sofia_doub;
+// typedef long			sofia_long;
+// typedef double			sofia_doub;
 
 /*
 ------------------------------------------------------------
@@ -108,16 +107,60 @@ enum PROGRAMS {
 	PGM_WRT = '5', // Writer:	10pt
 };
 
+/* custom neon datatypes*/
+
+typedef enum IMG_FMT {
+	PNG,
+	JPG,
+}IMG_FMT;
+
+typedef enum AUDIO_FMT {
+	WAV,
+	MP3,
+	MP4,
+	OGG
+}AUDIO_FMT;
+
+
+typedef struct IMG {
+	char* path;
+	IMG_FMT fmt;
+} image ;
+
+typedef struct AUDIO {
+	char* path;
+	AUDIO_FMT fmt;
+} audio ;
+
+typedef enum DOC_TYPE {
+	PDF,
+	DOCX,
+	TXT,
+	UNKNOWN
+}DOC_TYPE;
+
+typedef struct DOC {
+	char* path;
+	DOC_TYPE type;
+} doc;
+
+typedef union MEDIA {
+	text text_data;
+	image image_data;
+	audio audio_data;
+	doc document;
+} media;
+
 /*
 ------------------------------------------------------------
 Main functions signatures
 (Code will be updated during next assignments)
 ------------------------------------------------------------
 */
-sofia_intg main1Coder	(sofia_intg argc, sofia_strg* argv);
+int main1Coder	(int argc, text* argv);
 
-sofia_void printLogo();
-sofia_void errorPrint(sofia_strg fmt, ...);
+void printLogo();
+void errorPrint(text fmt, ...);
 
 #endif
 

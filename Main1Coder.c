@@ -9,23 +9,23 @@
 # ECHO "=---------------------------------------="
 # ECHO "|  COMPILERS - ALGONQUIN COLLEGE (S25)  |"
 # ECHO "=---------------------------------------="
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@           %&@@@@@@@@@@@     @@    ”
-# ECHO "    @@       @%% (@@@@@@@@@  @     @@    ”
-# ECHO "    @@      @& @   @ @       @     @@    ”
-# ECHO "    @@     @ @ %  / /   @@@@@@     @@    ”
-# ECHO "    @@      & @ @  @@              @@    ”
-# ECHO "    @@       @/ @*@ @ @   @        @@    ”
-# ECHO "    @@           @@@@  @@ @ @      @@    ”
-# ECHO "    @@            /@@    @@@ @     @@    ”
-# ECHO "    @@     @      / /     @@ @     @@    ”
-# ECHO "    @@     @ @@   /@/   @@@ @      @@    ”
-# ECHO "    @@     @@@@@@@@@@@@@@@         @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@         S O F I A           @@    ”
-# ECHO "    @@                             @@    ”
-# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
+# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ï¿½
+# ECHO "    @@                             @@    ï¿½
+# ECHO "    @@           %&@@@@@@@@@@@     @@    ï¿½
+# ECHO "    @@       @%% (@@@@@@@@@  @     @@    ï¿½
+# ECHO "    @@      @& @   @ @       @     @@    ï¿½
+# ECHO "    @@     @ @ %  / /   @@@@@@     @@    ï¿½
+# ECHO "    @@      & @ @  @@              @@    ï¿½
+# ECHO "    @@       @/ @*@ @ @   @        @@    ï¿½
+# ECHO "    @@           @@@@  @@ @ @      @@    ï¿½
+# ECHO "    @@            /@@    @@@ @     @@    ï¿½
+# ECHO "    @@     @      / /     @@ @     @@    ï¿½
+# ECHO "    @@     @ @@   /@/   @@@ @      @@    ï¿½
+# ECHO "    @@     @@@@@@@@@@@@@@@         @@    ï¿½
+# ECHO "    @@                             @@    ï¿½
+# ECHO "    @@         S O F I A           @@    ï¿½
+# ECHO "    @@                             @@    ï¿½
+# ECHO "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ï¿½
 # ECHO "                                         "
 # ECHO "[CODER SCRIPT ..........................]"
 # ECHO "                                         "
@@ -35,7 +35,7 @@
 ************************************************************
 * File name: MainCoder.c
 * Compiler: MS Visual Studio 2022
-* Course: CST 8152 – Compilers, Lab Section: [011, 012]
+* Course: CST 8152 ï¿½ Compilers, Lab Section: [011, 012]
 * Assignment: A12, A22, A32.
 * Date: Jan 01 2025
 * Professor: Paulo Sousa
@@ -104,38 +104,47 @@
 */
 
 // Main function to handle command-line arguments
-sofia_intg main1Coder(sofia_intg argc, sofia_strg* argv) {
+
+/********************************************
+Function name: main1Coder
+Purpose: This function is the main function that handles the command-line arguments.
+Function In parameters: int argc, char** argv
+Function Out parameters: int (EXIT_SUCCESS or EXIT_FAILURE)
+Version: 1.0
+Author: Ikeoluwa Oladele & Paulo Sousa
+********************************************/
+int main1Coder(int argc, char** argv) {
 	if (argc < 5) {
 		printf("Usage: %s [cypher=1|decypher=0] <input_file> <output_file>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
-	sofia_strg operation = "";
-	sofia_strg inputFileName = "";
-	sofia_strg key = STR_LANGNAME;
-	sofia_strg outputFileName = "";
-	if (argc > 4) {
-		operation = argv[2];
-		inputFileName = argv[3];
-		outputFileName = argv[4];
-		// Call the appropriate function to file
-		if (atoi(operation) == CYPHER)
-			cypher(inputFileName, outputFileName, key);
-		else if (atoi(operation) == DECYPHER)
-			decypher(inputFileName, outputFileName, key);
-		else {
-			errorPrint("%s%s%s", "Error: Unknown operation ", operation, ". Use 'cypher' or 'decypher'.\n");
-			return EXIT_FAILURE;
-		}
-		printf("Operation '%s' completed successfully.\n", operation);
-		// Call the other operation in memory
-		sofia_intg size = getSizeOfFile(outputFileName);
-		sofia_strg output;
-		if (atoi(operation) == CYPHER)
-			output = vigenereMem(outputFileName, key, DECYPHER);
-		else 
-			output = vigenereMem(outputFileName, key, CYPHER);
-		printf("OUTPUT:\n%s\n", output);
+
+	char* outputFileName = "";
+	char* key = STR_LANGNAME;
+	size_t keyLen = strlen(key);
+	char* inputFileName = "";
+	char* operation = "";
+	operation = argv[2];
+	inputFileName = argv[3];
+	outputFileName = argv[4];
+	// Call the appropriate function to file
+	if (atoi(operation) == CYPHER)
+		cypher(inputFileName, outputFileName, key, keyLen);
+	else if (atoi(operation) == DECYPHER)
+		decypher(inputFileName, outputFileName, key, keyLen);
+	else {
+		errorPrint("%s%s%s", "Error: Unknown operation ", operation, ". Use 'cypher' or 'decypher'.\n");
+		return EXIT_FAILURE;
 	}
+	printf("Operation '%s' completed successfully.\n", operation);
+	// Call the other operation in memory
+	char* output;
+	if (atoi(operation) == CYPHER)
+		output = vigenereMem(outputFileName, key, keyLen, DECYPHER);
+	else
+		output = vigenereMem(outputFileName, key,keyLen, CYPHER);
+	printf("OUTPUT:\n%s\n", output);
+
 	return EXIT_SUCCESS;
 }
 

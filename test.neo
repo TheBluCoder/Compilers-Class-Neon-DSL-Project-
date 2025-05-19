@@ -1,0 +1,20 @@
+load model "gemini"
+load model "claude"
+load model "openai-tts"
+
+text doc_text, image doc_images = doc("article.pdf", PDF)  // Extract both text & images from a document
+audio input_audio = audio("voice.wav", WAV)                // Load audio file
+
+using gemini:
+    text ocr_text = ask("What does this image say?", doc_images)
+    output(ocr_text)
+
+using claude:
+    text haiku = generate("Write a haiku about the document", doc_text)
+    cache(haiku)
+
+using openai-tts:
+    audio speech = generate("Convert to speech", haiku)
+    save(speech, "haiku_speech.wav")
+
+stream_out(haiku, console)
