@@ -94,7 +94,7 @@ int main(int argc, char** argv) {
 			PGM_WRT, "] - Writer\n");
 		return EXIT_FAILURE;
 	}
-	char option = argv[1][0];
+	const char option = argv[1][0];
 	switch (option) {
 	case PGM_CDR:
 		printf("%s%c%s", "\n[Option '", PGM_CDR, "': Starting CODER .....]\n\n");

@@ -127,6 +127,7 @@ int main1Coder(int argc, char** argv) {
 	operation = argv[2];
 	inputFileName = argv[3];
 	outputFileName = argv[4];
+
 	// Call the appropriate function to file
 	if (atoi(operation) == CYPHER)
 		cypher(inputFileName, outputFileName, key, keyLen);
@@ -137,6 +138,7 @@ int main1Coder(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 	printf("Operation '%s' completed successfully.\n", operation);
+
 	// Call the other operation in memory
 	char* output;
 	if (atoi(operation) == CYPHER)

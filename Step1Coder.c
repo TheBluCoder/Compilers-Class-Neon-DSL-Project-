@@ -125,7 +125,7 @@ char* vigenereMem(const char* inputFileName,const char* key,const size_t keyLen,
 	size_t currentFileContentLength = 0;
 	size_t newTotalFileContentLength=0;
 	size_t charRead= 0;
-	const int BUFFER_SIZE = 150;
+	const int BUFFER_SIZE = 100;
 	char tempBuffer[BUFFER_SIZE];
 
 	//--------- Extracting File Content ----------
