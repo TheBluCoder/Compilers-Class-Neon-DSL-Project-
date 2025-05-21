@@ -195,7 +195,6 @@ Version: 1.0
 Author: Ikeoluwa Oladele
 ********************************************/
 int isValidChunk(const char* strToVerify, const size_t size) {
-	printf("%s\n", strToVerify);
 	for (int i = 0; i < size; i++) {
 		const char c = strToVerify[i];
 		if ((c < ASCII_START  || c > ASCII_END) && c!='\n') {
