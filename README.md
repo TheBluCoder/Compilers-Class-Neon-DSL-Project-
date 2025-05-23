@@ -1,27 +1,62 @@
-# CST8512 Compilers Course Project - Assignment 1
+# CST8512 Compilers Course Project - Assignment 1: Neo Compiler
 
-This repository contains the implementation of a Domain Specific Language (DSL) called Neon for the CST8512 Compilers course. The current branch (`assignment_1`) focuses on implementing the Vigenère cipher for encoding and decoding Neon source code.
+This repository contains the implementation of a Domain Specific Language (DSL) called Neo for the CST8512 Compilers course. The current branch (`assignment_1`) focuses on implementing the Vigenère cipher for encoding and decoding Neo source code.
+
+Neo is a domain-specific language designed for AI model integration and document processing.
+
+## Project Structure
+
+```
+src/
+├── Compilers.c          # Main compiler implementation
+├── Compilers.h          # Compiler header file
+├── Step1Coder.c         # Step 1 coding implementation (Vigenère cipher)
+├── Step1Coder.h         # Step 1 coding header
+├── Main1Coder.c         # Main coder implementation
+├── CMakeLists.txt       # CMake build configuration
+├── run.sh               # Recommended build script (Linux/Mac/WSL)
+├── run.bat              # Windows build script
+├── test.neo             # Sample Neo source file
+└── out.txt              # Example output file (gitignored)
+
+```
+
+## Prerequisites
+
+Before building and running the compiler, ensure you have the following installed:
+
+- **Git**
+- **CMake** (version 3.10 or higher)
+- **Make** build system
+- **GCC** or compatible C compiler
+
+### Installing Prerequisites
+
+**Ubuntu/Debian:**
+```bash
+sudo apt update
+sudo apt install git cmake build-essential
+```
+
+**Windows:**
+- Install Git from https://git-scm.com/
+- Install CMake from https://cmake.org/download/
+- Install MinGW-w64, Visual Studio Build Tools, or CLion
+- Ensure `cmake` and `make` are in your PATH
+
+**macOS:**
+```bash
+# Install Xcode Command Line Tools
+xcode-select --install
+
+# Install Homebrew (if not already installed)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install dependencies
+brew install git cmake
+```
 
 ## Getting Started
-
-### Prerequisites
-
-- Git
-- CMake (version 3.10 or higher)
-  - Windows: Download and install from [CMake's official website](https://cmake.org/download/)
-  - Linux: Install using package manager
-    ```bash
-    sudo apt update
-    sudo apt install cmake
-    ```
-  - Mac: Install using Homebrew
-    ```bash
-    brew install cmake
-    ```
-- C compiler:
-  - Windows: CLion, MS Visual Studio 2022, or MinGW
-  - Linux: GCC
-  - Mac: Xcode Command Line Tools
 
 ### Installation
 
@@ -36,19 +71,60 @@ cd cst8512
 git checkout assignment_1
 ```
 
-### Building the Project
+3. Navigate to the source directory:
+```bash
+cd src
+```
 
-#### Windows
+## Building and Running (Recommended Method)
 
-You can build the project using any of these methods:
+### Using the Shell Script (RECOMMENDED - TESTED)
 
-##### Using CLion (Recommended)
+The easiest and most reliable way to build and run the compiler is using the provided shell script:
+
+**Linux/Mac/WSL:**
+```bash
+chmod +x run.sh
+
+# To encode a .neo file to compiled output:
+./run.sh encode
+
+# To decode compiled output back to .neo format:
+./run.sh decode
+```
+
+**Windows:**
+```cmd
+# To encode a .neo file to compiled output:
+run.bat encode
+
+# To decode compiled output back to .neo format:
+run.bat decode
+```
+
+These scripts will:
+1. Check for required dependencies (CMake, Make)
+2. Clean any existing build directory
+3. Create a new build directory
+4. Run CMake configuration
+5. Build the project using Make
+6. Execute the compiler with appropriate arguments
+
+The scripts support two operations:
+- **encode**: Compiles `test.neo` → `out.txt`
+- **decode**: Decompiles `out.txt` → `decoded.neo`
+
+## Alternative Build Methods
+
+While the shell/batch scripts are the recommended approach, you can also build the project manually using the following methods:
+
+### Method 1: Using CLion (Windows)
 1. Open CLion
 2. Select "Open" and choose the project directory
 3. CLion will automatically detect the CMake project and configure it
 4. Click the "Build" button or press Ctrl+F9
 
-##### Using Visual Studio
+### Method 2: Using Visual Studio (Windows)
 ```bash
 # Create build directory
 mkdir build
@@ -61,7 +137,7 @@ cmake ..
 cmake --build . --config Release
 ```
 
-##### Using MinGW
+### Method 3: Using MinGW (Windows)
 ```bash
 # Create build directory
 mkdir build
@@ -74,56 +150,39 @@ cmake -G "MinGW Makefiles" ..
 mingw32-make
 ```
 
-#### Linux/Mac
+### Method 4: Manual CMake Build (Linux/Mac)
 ```bash
-# Create build directory
 mkdir build
 cd build
-
-# Generate makefiles
 cmake ..
-
-# Build the project
 make
+
+# Run manually:
+./Compilers 1 1 ../test.neo ../out.txt     # encode
+./Compilers 1 0 ../out.txt ../decoded.neo  # decode
 ```
 
-After building, the executable will be located in the `build` directory.
+### Method 5: Direct GCC Compilation
+```bash
+gcc -o Compilers Compilers.c Step1Coder.c Main1Coder.c
 
-## About Neon DSL
-
-Neon is a custom Domain Specific Language with `.neo` file extension. This assignment implements the Vigenère cipher functionality to encode and decode Neon source code.
-
-## Project Structure
-
-- `Compilers.h` and `Compilers.c`: Core compiler components and utilities
-- `Step1Coder.h` and `Step1Coder.c`: Implementation of the Vigenère cipher functionality
-- `Main1Coder.c`: Main program entry point
-- `test.neo`: Sample Neon DSL code for testing
-- `out.txt`: Generated output file containing encoded/decoded results (gitignored)
-- `CMakeLists.txt`: Build configuration file
-- `.gitignore`: Specifies files to be ignored by git (including out.txt)
+# Run:
+./Compilers 1 1 test.neo out.txt     # encode
+./Compilers 1 0 out.txt decoded.neo  # decode
+```
 
 ## Usage
 
-The program requires exactly 4 command-line arguments to run:
-
-### Windows
-```bash
-./Compilers.exe 1 <cypher-option> <input-file> <output-file>
+The compiler accepts the following command-line arguments:
+```
+./Compilers <step> <mode> <input_file> <output_file>
 ```
 
-### Linux/Mac
-```bash
-./Compilers 1 <cypher-option> <input-file> <output-file>
-```
-
-Required Parameters:
-- First argument is always `1` (Assignment 1)
-- `<cypher-option>`: Must be either:
-  - `1`: Encode the input file
-  - `0`: Decode the input file
-- `<input-file>`: Path to your Neon source file (e.g., `test.neo`)
-- `<output-file>`: Path where the encoded/decoded result will be stored (e.g., `out.txt`)
+Where:
+- `step`: Compilation step (1 for Step 1 processing/Assignment 1)
+- `mode`: 1 for encode, 0 for decode
+- `input_file`: Source file to process
+- `output_file`: Destination file for output
 
 ### Examples
 
@@ -152,14 +211,38 @@ If any of the required parameters are missing, the program will display a usage 
 Usage: Compilers [cypher=1|decypher=0] <input_file> <output_file>
 ```
 
-The program will process the input file and generate the encoded/decoded output in the specified output file.
+## About Neo DSL
+
+Neo is a Domain Specific Language with `.neo` file extension designed for AI model integration and document processing. The project includes a sample Neo program (`test.neo`) that demonstrates:
+- Loading AI models (Gemini, Claude, OpenAI-TTS)
+- Document processing and text extraction
+- Audio file handling
+- Model-specific operations
+- Output generation and caching
 
 ## Assignment 1 Features
 
-- Implementation of Vigenère cipher algorithm
-- Support for encoding and decoding Neon DSL code
-- Basic data type definitions for the Neon language
+- Implementation of Vigenère cipher algorithm for encoding and decoding
+- Support for encoding and decoding Neo DSL code
+- Basic data type definitions for the Neo language
 - File I/O handling for `.neo` files
+- Cross-platform build support (Windows, Linux, macOS)
+
+## Troubleshooting
+
+**Build Failures:**
+- Ensure CMake and Make are properly installed and in PATH
+- Check that you have a compatible C compiler installed
+- Try cleaning the build directory: `rm -rf build` (Linux/Mac) or `rmdir /s build` (Windows)
+
+**Permission Issues (Linux/Mac):**
+```bash
+chmod +x run.sh
+```
+
+**Missing Dependencies:**
+- The scripts will check for CMake and Make and provide error messages if missing
+- Follow the prerequisite installation instructions above
 
 ## Development
 
@@ -167,6 +250,14 @@ This is Assignment 1 of the CST8512 Compilers course at Algonquin College. The p
 - `assignment_1`: Current branch implementing Vigenère cipher (this branch)
 - `assignment_2`: Future branch that will implement lexical analysis
 
+## Author
+
+Ikeoluwa Oladele - Compilers Assignment 1
+
 ## License
 
-This is a private repository for educational purposes. 
+This is a private repository for educational purposes.
+
+---
+
+**Note:** The shell script (`run.sh`) and batch script (`run.bat`) are the thoroughly tested and recommended methods for building and running this project. Other build methods are provided for reference but may require additional configuration.

@@ -1,7 +1,19 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Set umask for consistent file permissions
 umask 022
+
+# Check if CMake is installed
+if ! command -v cmake &> /dev/null; then
+    echo "Error: CMake is not installed. Please install CMake and try again."
+    exit 1
+fi
+
+# Check if Make is installed
+if ! command -v make &> /dev/null; then
+    echo "Error: Make is not installed. Please install Make and try again."
+    exit 1
+fi
 
 # Check if an argument is provided
 if [[ -z "$1" ]]; then
@@ -22,7 +34,7 @@ echo "Entering build directory..."
 cd build || { echo "Error: Could not enter build directory. Exiting."; exit 1; }
 
 # Run CMake and check for success
-echo "Running CMake..."
+echo "-------- Running CMake --------"
 cmake ..
 if [ $? -ne 0 ]; then
     echo "Error: CMake configuration failed. Exiting."
@@ -30,7 +42,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Run Make and check for success
-echo "Running Make..."
+echo "-------- Running Make --------"
 make
 if [ $? -ne 0 ]; then
     echo "Error: Build failed. Exiting."
