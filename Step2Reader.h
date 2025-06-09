@@ -118,14 +118,14 @@ typedef struct bufferReader {
 
 /* General Operations */
 BufferPointer	readerCreate		(int);
-BufferPointer	readerAddChar		(BufferPointer const, char);
+BufferPointer	readerAddChar		(BufferPointer const, char, int);
 boolean		readerClear		    (BufferPointer const);
 boolean		readerFree		    (BufferPointer const);
 boolean		readerIsFull		(BufferPointer const);
 boolean		readerIsEmpty		(BufferPointer const);
 boolean		readerSetMark		(BufferPointer const, int);
 int		readerPrint		    (BufferPointer const);
-int		readerLoad			(BufferPointer const, char*    );
+int		readerLoad			(BufferPointer const, char*,char*,int    );
 boolean		readerRecover		(BufferPointer const);
 boolean		readerRetract		(BufferPointer const);
 boolean		readerRestore		(BufferPointer const);

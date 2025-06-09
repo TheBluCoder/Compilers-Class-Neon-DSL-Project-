@@ -98,7 +98,7 @@
 void displayBuffer(BufferPointer ptr_Buffer);
 long getFileSize(char* fname);
 int isNumber(const char* ns);
-void startReader(char*, char*);
+void startReader(char*, char*, char*, char*);
 
 /*
 ************************************************************
@@ -115,7 +115,8 @@ int main2Reader(int argc, char** argv) {
 	/* Create source input buffer */
 	char* program = argv[0];
 	char* input = argv[2];
-	int size = 0;
+	char* key = argv[3];
+	char* maxSize = argv[4];
 	///char* output = (char*)malloc(strlen(input) + strlen(SUFFIX_READER) + 1);
     ///if (output == NULL) {  
     ///   errorPrint("Memory allocation failed for 'output'.");  
@@ -133,7 +134,7 @@ int main2Reader(int argc, char** argv) {
 	}
 	///decypher(input, output, STR_LANGNAME);
 	///startReader(program, output);
-	startReader(program, input);
+	startReader(program, input, key, maxSize);
 
 	/* Return success */
 	return (EXIT_SUCCESS);
@@ -147,16 +148,20 @@ int main2Reader(int argc, char** argv) {
 *	- Input: Filename
 *	- Mode: Operational mode
 *	- Size: Buffer capacity
+*	- Key: Encrypt word
 *	- Increment: buffer increment.
 ************************************************************
 */
-void startReader(char* program, char* input) {
+void startReader(char* program, char* input, char* key, char* maxSize) {
 
 	BufferPointer bufferp;		/* pointer to Buffer structure */
 	int loadSize = 0;	/* the size of the file loaded in the buffer */
+	int maxSizeInt = atoi(maxSize);
+	int bufferSize = READER_DEFAULT_SIZE > maxSizeInt ? maxSizeInt : READER_DEFAULT_SIZE;
+	printf("The buffer size here is %d",bufferSize);
 
 	/* Create buffer */
-	bufferp = readerCreate(READER_DEFAULT_SIZE);
+	bufferp = readerCreate(bufferSize);
 
 	if (bufferp == NULL) {
 		errorPrint("%s%s", program, ": Cannot allocate buffer - Use: buffer <input>.");
@@ -167,7 +172,7 @@ void startReader(char* program, char* input) {
 	/* Load source file into input buffer  */
 	printf("Reading file %s ....Please wait\n", input);
 	printf("before");
-	loadSize = readerLoad(bufferp, input);
+	loadSize = readerLoad(bufferp, input,key, maxSizeInt);
 	printf("here");
 
 	/* Sets the checksum */
@@ -182,7 +187,7 @@ void startReader(char* program, char* input) {
 
 	/* Finishes the buffer: add end of file character (EOF) to the buffer display again */
 	if ((loadSize != READER_ERROR) && (loadSize != 0)) {
-		if (!readerAddChar(bufferp, READER_TERMINATOR)) {
+		if (!readerAddChar(bufferp, READER_TERMINATOR,maxSizeInt)) {
 			errorPrint("%s%s%s", program, ": ", "Error in compacting buffer.");
 		}
 	}
@@ -249,7 +254,7 @@ void displayBuffer(BufferPointer ptr_Buffer) {
 	printf("The size of the buffer is:  %d\n",
 		readerGetSize(ptr_Buffer));
 	printf("The current size of the buffer is:  %d\n",
-		readerGetPosWrte(ptr_Buffer));
+		readerGetPosWrte(ptr_Buffer)+1); //+1 because it is zero-based.
 	printf("The first symbol in the buffer is:  %c\n",
 		readerGetPosWrte(ptr_Buffer) ? *readerGetContent(ptr_Buffer, 0) : ' ');
 	printf("The value of the flags field is: %02hX\n",

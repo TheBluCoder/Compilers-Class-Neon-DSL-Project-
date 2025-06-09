@@ -112,9 +112,6 @@ BufferPointer readerCreate(int size) {
 	readerPointer->size = size;
 	readerPointer->content = content;
 
-	readerPointer->size = size;
-	readerPointer->content = content;
-
 
 	/* Initialize positions */
 	readerPointer->position.read = POSITION_INITIAL_POINT;
@@ -156,59 +153,71 @@ BufferPointer readerCreate(int size) {
 */
 
 
-BufferPointer readerAddChar(BufferPointer const readerPointer, char ch) {
-	char* tempReader = NULL;
-	/* TO_DO: Defensive programming */
-	if (readerPointer == NULL) {
-		return NULL;
-	}
 
-	/* Check if character is valid (between ASCII Range) */
-	if (ch < 0 || ch >= NCHAR) {
-		readerPointer->numReaderErrors++;
-		return readerPointer;  // Return the pointer even on error
-	}
 
-	/* Check if buffer needs reallocation BEFORE adding the character */
-	if (readerPointer->position.wrte + 1 >= readerPointer->size) {
-		size_t newSize = readerPointer->size * 2;
-		tempReader = (char*)realloc(readerPointer->content, newSize);
+BufferPointer readerAddChar(BufferPointer const readerPointer, char ch, int maxSize) {
+    char* tempReader = NULL;
 
-		/* Defensive programming */
-		if (tempReader == NULL) {
-			errorPrint("Memory allocation error: Could not re-allocate memory for reader content.");
-			return NULL;
-		}
+    /* Defensive programming */
+    if (readerPointer == NULL) {
+        return NULL;
+    }
 
-		if (readerPointer->content != tempReader) {
-			readerPointer->flags.isMoved = True;
-		}
+    /* Check if character is valid (between ASCII Range) */
+    if (ch < 0 || ch >= NCHAR) {
+        readerPointer->numReaderErrors++;
+        return readerPointer;
+    }
 
-		readerPointer->content = tempReader;
-		readerPointer->size = newSize;
-		readerPointer->flags.isFull = False;  // Buffer is no longer full after reallocation
-	}
+    /* Check if buffer needs reallocation BEFORE adding the character */
+    if (readerPointer->position.wrte + 1 >= readerPointer->size) {
+        /* Check if we can reallocate */
+        if (readerPointer->size >= maxSize) {
+            /* Cannot grow anymore - buffer is full */
+            readerPointer->flags.isFull = True;
+            return readerPointer;  /* Cannot add character */
+        }
 
-	/* Add the char */
-	readerPointer->content[++(readerPointer->position.wrte)] = ch;
+        /* Calculate new size - double current size but don't exceed maxSize */
+        size_t newSize = readerPointer->size * 2;
+        if (newSize > maxSize) {
+            newSize = maxSize;  /* Set to max if doubling would exceed it */
+        }
 
-	/* Check if buffer is now full after adding the character */
-	if (readerPointer->position.wrte + 1 >= readerPointer->size) {
-		readerPointer->flags.isFull = True;
-	}
+        /* Attempt reallocation */
+        tempReader = (char*)realloc(readerPointer->content, newSize);
+        if (tempReader == NULL) {
+            errorPrint("Memory allocation error: Could not re-allocate memory for reader content.");
+            readerPointer->numReaderErrors++;
+            readerPointer->flags.isFull = True;
+            return readerPointer;  /* Cannot add character */
+        }
 
-	/* Reset the Empty flag */
-	if (readerPointer->flags.isEmpty) {
-		readerPointer->flags.isEmpty = False;
-	}
+        /* Update pointer and size */
+        if (readerPointer->content != tempReader) {
+            readerPointer->flags.isMoved = True;
+        }
+        readerPointer->content = tempReader;
+        readerPointer->size = newSize;
+        readerPointer->flags.isFull = False;
+    }
 
-	/* Updates histogram */
-	(readerPointer->histogram[ch])++;
+    /* Now it's safe to add the character */
+    readerPointer->position.wrte++;
+    readerPointer->content[readerPointer->position.wrte] = ch;
 
-	/* Updates checksum */
-	readerPointer->checkSum += ch;
+    /* Check if buffer is now full */
+    if (readerPointer->position.wrte + 1 >= readerPointer->size) {
+        readerPointer->flags.isFull = True;
+    }
 
-	return readerPointer;
+    /* Reset the Empty flag */
+    readerPointer->flags.isEmpty = False;
+
+    /* Updates histogram */
+    readerPointer->histogram[(unsigned char)ch]++;
+
+    return readerPointer;
 }
 /*
 ***********************************************************
@@ -269,7 +278,7 @@ boolean readerClear(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-boolean readerFree(BufferPointer const readerPointer) {
+boolean readerFree(BufferPointer readerPointer) {
 	/* TO_DO: Defensive programming */
 	if (readerPointer == NULL) {
 		return READER_ERROR;
@@ -347,9 +356,12 @@ boolean readerSetMark(BufferPointer const readerPointer, int mark) {
 	if (readerPointer == NULL) {
 		return READER_ERROR;
 	}
+	if (mark < 0 || mark > readerPointer->position.wrte) {
+		return READER_ERROR;
+	}
 	const int oldMark = readerPointer->position.mark;
 	readerPointer->position.mark = mark;
-	return readerPointer->position.mark == oldMark;
+	return readerPointer->position.mark != oldMark;
 }
 
 
@@ -428,15 +440,16 @@ int readerPrint(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-int readerLoad(BufferPointer const readerPointer, char* fileName) {
+int readerLoad(BufferPointer const readerPointer, char* fileName, char*key, int maxSize) {
 	int count = 0;
+	int keyLen = strlen(key);
 	/* TO_DO: Defensive programming */
 	if (readerPointer == NULL) {
 		return READER_ERROR;
 	}
 	/* TO_DO: Loads the file */
 	/* TO_DO: Creates the string calling vigenereMem(fileName, STR_LANGNAME, DECYPHER) */
-	char * decodedStr = vigenereMem(fileName, STR_LANGNAME, strlen(STR_LANGNAME) ,DECYPHER);
+	char * decodedStr = vigenereMem(fileName, key, keyLen ,DECYPHER);
 	if (decodedStr == NULL) {
 		return DECODER_ERROR;
 	}
@@ -445,7 +458,7 @@ int readerLoad(BufferPointer const readerPointer, char* fileName) {
 		if (ch =='\0') {
 			continue;
 		}
-		count = readerAddChar(readerPointer, ch) != NULL ? count + 1 : count;
+		count = readerAddChar(readerPointer, ch, maxSize) != NULL ? count + 1 : count;
 	}
 	free(decodedStr);
 	return count;

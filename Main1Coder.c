@@ -114,13 +114,13 @@ Version: 1.0
 Author: Ikeoluwa Oladele & Paulo Sousa
 ********************************************/
 int main1Coder(int argc, char** argv) {
-	if (argc < 5) {
-		printf("Usage: %s [cypher=1|decypher=0] <input_file> <output_file>\n", argv[0]);
+	if (argc < 6) {
+		printf("Usage: %s [cypher=1|decypher=0] <input_file> <output_file> <Key>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
 	char* outputFileName = "";
-	char* key = STR_LANGNAME;
+	char* key = argv[5];
 	size_t keyLen = strlen(key);
 	char* inputFileName = "";
 	char* operation = "";
