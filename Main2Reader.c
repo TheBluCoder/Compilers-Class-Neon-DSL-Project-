@@ -158,7 +158,6 @@ void startReader(char* program, char* input, char* key, char* maxSize) {
 	int loadSize = 0;	/* the size of the file loaded in the buffer */
 	int maxSizeInt = atoi(maxSize);
 	int bufferSize = READER_DEFAULT_SIZE > maxSizeInt ? maxSizeInt : READER_DEFAULT_SIZE;
-	printf("The buffer size here is %d",bufferSize);
 
 	/* Create buffer */
 	bufferp = readerCreate(bufferSize);
