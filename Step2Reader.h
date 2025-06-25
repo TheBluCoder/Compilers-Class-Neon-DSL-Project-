@@ -118,27 +118,27 @@ typedef struct bufferReader {
 
 /* General Operations */
 BufferPointer	readerCreate		(int);
-BufferPointer	readerAddChar		(BufferPointer const, char);
-boolean		readerClear		    (BufferPointer const);
-boolean		readerFree		    (BufferPointer const);
-boolean		readerIsFull		(BufferPointer const);
-boolean		readerIsEmpty		(BufferPointer const);
-boolean		readerSetMark		(BufferPointer const, int);
-int		readerPrint		    (BufferPointer const);
-int		readerLoad			(BufferPointer const, char*    );
-boolean		readerRecover		(BufferPointer const);
-boolean		readerRetract		(BufferPointer const);
-boolean		readerRestore		(BufferPointer const);
-int		readerChecksum		(BufferPointer const);
+BufferPointer	readerAddChar		(BufferPointer , char);
+boolean		readerClear		    (BufferPointer );
+boolean		readerFree		    (BufferPointer );
+boolean		readerIsFull		(BufferPointer );
+boolean		readerIsEmpty		(BufferPointer );
+boolean		readerSetMark		(BufferPointer , int);
+int		readerPrint		    (BufferPointer );
+int		readerLoad			(BufferPointer ,  const char*    );
+boolean		readerRecover		(BufferPointer );
+boolean		readerRetract		(BufferPointer );
+boolean		readerRestore		(BufferPointer );
+int		readerChecksum		(BufferPointer );
 /* Getters */
-char		readerGetChar		(BufferPointer const);
-char*    		readerGetContent	(BufferPointer const, int);
-int		readerGetPosRead	(BufferPointer const);
-int		readerGetPosWrte	(BufferPointer const);
-int		readerGetPosMark	(BufferPointer const);
-int		readerGetSize		(BufferPointer const);
-unsigned char readerGetFlags		(BufferPointer const);
-void		readerPrintStat		(BufferPointer const);
-int		readerNumErrors		(BufferPointer const);
+char		readerGetChar		(BufferPointer );
+char*    		readerGetContent	(BufferPointer , int);
+int		readerGetPosRead	(BufferPointer );
+int		readerGetPosWrte	(BufferPointer );
+int		readerGetPosMark	(BufferPointer );
+int		readerGetSize		(BufferPointer );
+unsigned char readerGetFlags		(BufferPointer );
+void		readerPrintStat		(BufferPointer );
+int		readerNumErrors		(BufferPointer );
 
 #endif

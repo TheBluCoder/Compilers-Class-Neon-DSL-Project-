@@ -80,6 +80,8 @@ NOTE: Some types may not be directly used by your language,
 /*Define your typedefs */
 typedef char*			text;
 typedef unsigned char	boolean;
+typedef double			bigNumber;
+typedef float			number;
 
 
 /*
@@ -144,6 +146,11 @@ typedef union MEDIA {
 	doc document;
 } media;
 
+typedef struct {
+	float* vector;
+	size_t length;
+} embedding;
+
 /*
 ------------------------------------------------------------
 Main functions signatures
@@ -152,6 +159,7 @@ Main functions signatures
 */
 int main1Coder	(int argc, text* argv);
 int main2Reader(int argc, char** argv);
+int main3Scanner(int argc, char** argv);
 void printLogo();
 void errorPrint(text fmt, ...);
 

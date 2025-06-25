@@ -428,7 +428,7 @@ int readerPrint(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-int readerLoad(BufferPointer const readerPointer, char* fileName) {
+int readerLoad(const BufferPointer  readerPointer, const char* fileName) {
 	int count = 0;
 	/* TO_DO: Defensive programming */
 	if (readerPointer == NULL) {
@@ -455,15 +455,11 @@ int readerLoad(BufferPointer const readerPointer, char* fileName) {
 /*
 ***********************************************************
 * Function name: readerRecover
-* Purpose: Rewinds the buffer.
+* Purpose: Rewinds the buffer to the beginning.
 * Parameters:
 *   readerPointer = pointer to Buffer Reader
 * Return value
 *	Boolean value about operation success
-* TO_DO:
-*   - Use defensive programming
-*	- Check boundary conditions
-*	- Adjust for your LANGUAGE.
 *************************************************************
 */
 boolean readerRecover(BufferPointer const readerPointer) {
@@ -586,7 +582,7 @@ char readerGetChar(BufferPointer const readerPointer) {
 *	- Adjust for your LANGUAGE.
 *************************************************************
 */
-char* readerGetContent(BufferPointer const readerPointer, int pos) {
+char* readerGetContent(BufferPointer const readerPointer, const int pos) {
 	/* Defensive programming */
 	if (readerPointer == NULL || readerPointer->content == NULL) {
 		return NULL;

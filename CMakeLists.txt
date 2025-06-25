@@ -37,10 +37,12 @@ project ("Compilers")
 
 # Add source to this project's executable.
 add_executable (Compilers 
-	"Compilers.h"		"Compilers.c"
-	"Step1Coder.h"		"Step1Coder.c"		"Main1Coder.c"
-        Step2Reader.c
-        Main2Reader.c
+			"Compilers.c"
+			"Step1Coder.c"		"Main1Coder.c"
+        "Step2Reader.c"
+        "Main2Reader.c"
+        "Step3Scanner.c"
+        "Main3Scanner.c"
 )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

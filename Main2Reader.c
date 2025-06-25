@@ -166,9 +166,7 @@ void startReader(char* program, char* input) {
 
 	/* Load source file into input buffer  */
 	printf("Reading file %s ....Please wait\n", input);
-	printf("before");
 	loadSize = readerLoad(bufferp, input);
-	printf("here");
 
 	/* Sets the checksum */
 	readerChecksum(bufferp);
