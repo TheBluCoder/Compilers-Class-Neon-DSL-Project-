@@ -349,7 +349,7 @@ boolean readerSetMark(BufferPointer const readerPointer, int mark) {
 	}
 	const int oldMark = readerPointer->position.mark;
 	readerPointer->position.mark = mark;
-	return readerPointer->position.mark == oldMark;
+	return readerPointer->position.mark != oldMark && readerPointer->position.mark == mark;
 }
 
 

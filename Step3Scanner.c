@@ -211,7 +211,7 @@ Token tokenizer(void) {
 
 	default: // general case
 		state = nextState(state, c);
-		lexStart = readerGetPosRead(sourceBuffer);
+		lexStart = readerGetPosRead(sourceBuffer)+1;
 		readerSetMark(sourceBuffer, lexStart);
 		int pos = 0;
 		while (stateType[state] == NOFS) {
@@ -311,14 +311,11 @@ int nextClass(char c) {
 	case UND_CHR:
 		val = 2;
 		break;
-	case AMP_CHR:
+	case QUT_CHR:
 		val = 3;
 		break;
-	case QUT_CHR:
-		val = 4;
-		break;
 	case HST_CHR:
-		val = 6;
+		val = 4;
 		break;
 	case EOS_CHR:
 	case (char) EOF_CHR:

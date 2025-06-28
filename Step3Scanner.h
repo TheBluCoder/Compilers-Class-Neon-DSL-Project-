@@ -153,14 +153,13 @@ typedef struct scannerData {
 #define EOS_CHR '\0'	// CH00
 #define EOF_CHR 0xFF	// CH01
 #define UND_CHR '_'		// CH02
-#define AMP_CHR '&'		// CH03
-#define QUT_CHR '"'		// CH04
-#define HST_CHR '#'		// CH05
-#define TAB_CHR '\t'	// CH06
-#define SPC_CHR ' '		// CH07
-#define NWL_CHR '\n'	// CH08
-#define LPR_CHR '('		// CH09
-#define RPR_CHR ')'		// CH10
+#define QUT_CHR '"'		// CH03
+#define HST_CHR '#'		// CH04
+#define TAB_CHR '\t'	// CH05
+#define SPC_CHR ' '		// CH06
+#define NWL_CHR '\n'	// CH07
+#define LPR_CHR '('		// CH08
+#define RPR_CHR ')'		// CH09
 
 
 /*  Special case tokens processed separately one by one in the token-driven part of the scanner:
@@ -178,18 +177,17 @@ typedef struct scannerData {
 
 /* TO_DO: Transition table - type of states defined in separate table */
 static int transitionTable[NUM_STATES][CHAR_CLASSES] = {
-/*    [A-z],[0-9],    _,    &,   \', SEOF,    #, other
-	   L(0), D(1), U(2), M(3), Q(4), E(5), C(6),  O(7) */
-	{     1, ESNR, ESNR, ESNR,    4, ESWR,	  6, ESNR},	// S0: NOAS
-	{     1,    1,    1,    2,	  3,    3,   3,    3},	// S1: NOAS
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S2: ASNR (MVID)
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S3: ASWR (KEY)
-	{     4,    4,    4,    4,    5, ESWR,	  4,    4},	// S4: NOAS
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S5: ASNR (SL)
-	{     6,    6,    6,    6,    6, ESWR,	  7,    6},	// S6: NOAS
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S7: ASNR (COM)
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S8: ASNR (ES)
-	{    FS,   FS,   FS,   FS,   FS,   FS,	 FS,   FS}  // S9: ASWR (ER)
+	/*    [A-z],[0-9],    _,   \', SEOF,    #, other
+		   L(0), D(1), U(2), Q(3), E(4), C(5),  O(6) */
+	{     1, ESNR, ESNR,    3, ESWR,	  5, ESNR},	// S0: NOAS
+	{     1,    1,    1,    2,    2,   2, ESNR},	// S1: NOAS
+	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S2: ASWR (KEY)
+	{     3,    3,    3,    4, ESWR,	  3,    3},	// S3: NOAS
+	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S4: ASNR (SL)
+	{     5,    5,    5,    5,    6,	  5,    5},	// S5: NOAS
+	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S6: ASNR (COM)
+	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S7: ASNR (ES)
+	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS}  // S8: ASWR (ER)
 };
 
 /* Define accepting states types */
@@ -201,14 +199,13 @@ static int transitionTable[NUM_STATES][CHAR_CLASSES] = {
 static int stateType[NUM_STATES] = {
 	NOFS, /* 00 */
 	NOFS, /* 01 */
-	FSNR, /* 02 (MID) - Methods */
-	FSWR, /* 03 (KEY) */
-	NOFS, /* 04 */
-	FSNR, /* 05 (SL) */
-	NOFS, /* 06 */
-	FSNR, /* 07 (COM) */
-	FSNR, /* 08 (Err1 - no retract) */
-	FSWR  /* 09 (Err2 - retract) */
+	FSWR, /* 02 (KEY) */
+	NOFS, /* 03 */
+	FSNR, /* 04 (SL) */
+	NOFS, /* 05 */
+	FSNR, /* 06(COM) */
+	FSNR, /* 07 (Err1 - no retract) */
+	FSWR  /* 08 (Err2 - retract) */
 };
 
 /*

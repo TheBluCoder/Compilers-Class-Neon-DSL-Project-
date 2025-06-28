@@ -95,7 +95,7 @@ int errorNumber;				/* Run-time error number = 0 by default (ANSI) */
 
 /* External objects */
 extern int line; /* Source code line numbers - defined in scanner.c */
-extern Token tokenizer(void);
+
 
 /*
  * -------------------------------------------------------------
