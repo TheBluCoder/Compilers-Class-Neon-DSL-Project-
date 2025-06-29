@@ -207,7 +207,7 @@ static int  transitionTable[NUM_STATES][CHAR_CLASSES] = {
 	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S2: ASWR (KEY)
 	{      3,    3,    3,    4, ESWR,	3,    3,       3},	// S3: NOAS
 	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S4: ASNR (SL)
-	{      5,    5,    5,    5,    6,	5,    5,       5},	// S5: NOAS
+	{      5,    5,    5,    5, ESNR,	6,    5,       5},	// S5: NOAS
 	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S6: ASNR (COM)
 	{   ESNR,    7, ESNR, ESNR,    8,    8,	  8,       8}, // S7: Reads digits, may go to float on dot
 	{     FS,    8,   FS,   FS,   FS,   FS,   FS,     ESNR},  // S8: Accepts digit after dot, floats ASWR
