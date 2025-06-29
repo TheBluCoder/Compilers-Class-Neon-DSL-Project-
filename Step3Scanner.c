@@ -373,6 +373,9 @@ int nextClass(char c) {
 	case (char) EOF_CHR:
 		val = 4;
 		break;
+	case POINT_CHR:
+		val=7;
+		break;
 	default:
 		if (isalpha(c))
 			val = 0;
@@ -454,6 +457,19 @@ Token funcIL(char* lexeme) {
  /* TO_DO: Adjust the function for ID */
 
 Token funcID(char* lexeme) {
+	Token currentToken = { 0 };
+	size_t length = strlen(lexeme);
+
+	if (length > NUM_LEN) {
+		currentToken = (*finalStateTable[ESNR])(lexeme);
+		return currentToken;
+	}
+
+	currentToken.
+	return currentToken;
+}
+
+Token funcFLOAT(char* lexeme) {
 	Token currentToken = { 0 };
 	size_t length = strlen(lexeme);
 

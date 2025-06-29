@@ -126,11 +126,11 @@ typedef union TokenAttribute {
 	RelOperator relationalOperator;		/* relational operator attribute code */
 	LogOperator logicalOperator;		/* logical operator attribute code */
 	EofOperator seofType;				/* source-end-of-file attribute code */
-	int intValue;				/* integer literal attribute (value) */
+	// int intValue;				/* integer literal attribute (value) */
 	int keywordIndex;			/* keyword index in the keyword table */
 	int FormatIndex;			/* Format token index in the format table*/
 	int contentString;			/* string literal offset from the beginning of the string literal buffer (stringLiteralTable->content) */
-	float floatValue;				/* floating-point literal attribute (value) */
+	double floatValue;				/* floating-point literal attribute (value) */
 	char idLexeme[VID_LEN + 1];		/* variable identifier token attribute */
 	char errLexeme[ERR_LEN + 1];	/* error token attribite */
 } TokenAttribute;
@@ -179,6 +179,7 @@ typedef struct scannerData {
 #define MUL_CHR '*'		// CH15
 #define DIV_CHR '/'		// CH16
 #define MOD_CHR '%'		// CH17
+#define POINT_CHR '.'   // CH18
 
 
 /*  Special case tokens processed separately one by one in the token-driven part of the scanner:
@@ -191,22 +192,24 @@ typedef struct scannerData {
 #define FS		10		/* Illegal state */
 
  /* TO_DO: State transition table definition */
-#define NUM_STATES		10
+#define NUM_STATES		11
 #define CHAR_CLASSES	8
 
 /* TO_DO: Transition table - type of states defined in separate table */
 static int transitionTable[NUM_STATES][CHAR_CLASSES] = {
-	/*    [A-z],[0-9],    _,   \', SEOF,    #, other
-		   L(0), D(1), U(2), Q(3), E(4), C(5),  O(6) */
-	{     1, ESNR, ESNR,    3, ESWR,	  5, ESNR},	// S0: NOAS
-	{     1,    1,    1,    2,    2,   2,    2},	// S1: NOAS
-	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S2: ASWR (KEY)
-	{     3,    3,    3,    4, ESWR,	  3,    3},	// S3: NOAS
-	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S4: ASNR (SL)
-	{     5,    5,    5,    5,    6,	  5,    5},	// S5: NOAS
-	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S6: ASNR (COM)
-	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S7: ASNR (ES)
-	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS}  // S8: ASWR (ER)
+	/*    [A-z],[0-9],    _,   \', SEOF,    #, other, .
+		   L(0), D(1), U(2), Q(3), E(4), C(5), O(6), FLOAT(7) */
+	{      1,    9, ESNR,    3, ESWR,    5, ESNR,    ESNR},	// S0: NOAS
+	{      1, ESNR,    1, ESNR,    2,    2,    2,    ESNR},	// S1: NOAS
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S2: ASWR (KEY)
+	{      3,    3,    3,    4, ESWR,	3,    3,       3},	// S3: NOAS
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S4: ASNR (SL)
+	{      5,    5,    5,    5,    6,	5,    5,       5},	// S5: NOAS
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S6: ASNR (COM)
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S7: ASNR (ES)
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},  // S8: ASWR (ER)
+	{   ESNR,    9, ESNR, ESNR,   10,   10, ESWR,      10}, // S9: Reads digits, may go to float on dot
+	{     FS,   10,   FS,   FS,   FS,   FS,   FS,     ESNR}  // S10: Accepts digit after dot, floats ASWR
 };
 
 /* Define accepting states types */
@@ -224,7 +227,9 @@ static int stateType[NUM_STATES] = {
 	NOFS, /* 05 */
 	FSNR, /* 06(COM) */
 	FSNR, /* 07 (Err1 - no retract) */
-	FSWR  /* 08 (Err2 - retract) */
+	FSWR,  /* 08 (Err2 - retract) */
+	NOFS, /* 09 */
+	FSWR, /* 10 (INT_L and floats) */
 };
 
 /*
@@ -256,7 +261,8 @@ Token funcID	(char* lexeme); //returns ID token
 Token funcCMT   (char* lexeme);
 Token funcKEY	(char* lexeme);
 Token funcErr	(char* lexeme);
-Token funcFMT  (char* lexeme);
+Token funcFMT   (char* lexeme);
+Token funcNUM   (char* lexeme);
 
 /* Declaring accepting state function helpers */
 int findKeywordIndex(char* lexeme);
@@ -278,7 +284,10 @@ static PTR_ACCFUN finalStateTable[NUM_STATES] = {
 	NULL,		/* -    [05] */
 	funcCMT,	/* COM  [06] */
 	funcErr,	/* ERR1 [07] */
-	funcErr		/* ERR2 [08] */
+	funcErr,   /* ERR2 [08] */
+	NULL,
+	funcNUM,	/* INT_L [10] */
+
 };
 
 /*
