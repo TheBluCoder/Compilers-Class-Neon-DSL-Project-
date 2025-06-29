@@ -421,18 +421,26 @@ Token funcCMT(char* lexeme) {
   */
   /* TO_DO: Adjust the function for IL */
 
-Token funcIL(char* lexeme) {
+Token funcNUM(char* lexeme) {
 	Token currentToken = { 0 };
-	long tlong;
 	if (lexeme[0] != EOS_CHR && strlen(lexeme) > NUM_LEN) {
 		currentToken = (*finalStateTable[ESNR])(lexeme);
+		return currentToken;
+	}
+
+	if (strchr(lexeme, POINT_CHR) != NULL) {
+		const double val = strtod(lexeme, NULL);
+		currentToken.code= FLOAT_T;
+		scData.scanHistogram[currentToken.code]++;
+		currentToken.attribute.floatValue = val;
 	}
 	else {
-		tlong = atol(lexeme);
-		if (tlong >= 0 && tlong <= SHRT_MAX) {
+
+		const long val = strtol(lexeme, NULL, 10);
+		if (val <= INT_MAX) {
 			currentToken.code = INTL_T;
 			scData.scanHistogram[currentToken.code]++;
-			currentToken.attribute.intValue = (int)tlong;
+			currentToken.attribute.intValue = (int)val;
 		}
 		else {
 			currentToken = (*finalStateTable[ESNR])(lexeme);
@@ -460,19 +468,6 @@ Token funcID(char* lexeme) {
 	Token currentToken = { 0 };
 	size_t length = strlen(lexeme);
 
-	if (length > NUM_LEN) {
-		currentToken = (*finalStateTable[ESNR])(lexeme);
-		return currentToken;
-	}
-
-	currentToken.
-	return currentToken;
-}
-
-Token funcFLOAT(char* lexeme) {
-	Token currentToken = { 0 };
-	size_t length = strlen(lexeme);
-
 	if (length > VID_LEN) {
 		currentToken = (*finalStateTable[ESNR])(lexeme);
 		return currentToken;
@@ -483,6 +478,7 @@ Token funcFLOAT(char* lexeme) {
 	currentToken.attribute.idLexeme[VID_LEN] = EOS_CHR;
 	return currentToken;
 }
+
 
 Token getToken(char* lexeme) {
 	if (findKeywordIndex(lexeme) != -1) {
@@ -692,6 +688,14 @@ void printToken(Token t) {
 
 	case ARIT_OP_T:
 		printf("ARIT_OP_T\t\t%s\n", aritOpStrTable[t.attribute.arithmeticOperator]);
+		break;
+
+	case FLOAT_T:
+		printf("FLOAT_T\t\t%f\n", t.attribute.floatValue);
+		break;
+
+	case INTL_T:
+		printf("INTL_T\t\t%d\n", t.attribute.intValue);
 		break;
 
 	default:

@@ -71,7 +71,7 @@
 #define RTE_CODE 1  /* Value for run-time error */
 
 /* TO_DO: Define the number of tokens */
-#define NUM_TOKENS 16
+#define NUM_TOKENS 17
 
 /* TO_DO: Define Token codes - Create your token classes */
 enum TOKENS {
@@ -91,6 +91,7 @@ enum TOKENS {
 	ASSIGN_T,	/* 13: Assignment token */
 	COLON_T,	/* 14: Colon token */
 	ARIT_OP_T,	/* 15: Arithmetic operator token */
+	FLOAT_T,	/* 16: Floating-point literal token */
 };
 
 /* TO_DO: Define the list of keywords */
@@ -110,6 +111,8 @@ static char* tokenStrTable[NUM_TOKENS] = {
 	"COM_T",
 	"ASSIGN_T",
 	"COLON_T",
+	"ARIT_T",
+	"FLOAT_T",
 };
 
 /* TO_DO: Operators token attributes */
@@ -126,7 +129,7 @@ typedef union TokenAttribute {
 	RelOperator relationalOperator;		/* relational operator attribute code */
 	LogOperator logicalOperator;		/* logical operator attribute code */
 	EofOperator seofType;				/* source-end-of-file attribute code */
-	// int intValue;				/* integer literal attribute (value) */
+	int intValue;				/* integer literal attribute (value) */
 	int keywordIndex;			/* keyword index in the keyword table */
 	int FormatIndex;			/* Format token index in the format table*/
 	int contentString;			/* string literal offset from the beginning of the string literal buffer (stringLiteralTable->content) */
@@ -187,29 +190,29 @@ typedef struct scannerData {
 
 
 /* TO_DO: Error states and illegal state */
-#define ESNR	8		/* Error state with no retract */
-#define ESWR	9		/* Error state with retract */
-#define FS		10		/* Illegal state */
+#define ESNR	9		/* Error state with no retract */
+#define ESWR	10		/* Error state with retract */
+#define FS		11		/* Illegal state */
 
  /* TO_DO: State transition table definition */
 #define NUM_STATES		11
 #define CHAR_CLASSES	8
 
 /* TO_DO: Transition table - type of states defined in separate table */
-static int transitionTable[NUM_STATES][CHAR_CLASSES] = {
+static int  transitionTable[NUM_STATES][CHAR_CLASSES] = {
 	/*    [A-z],[0-9],    _,   \', SEOF,    #, other, .
 		   L(0), D(1), U(2), Q(3), E(4), C(5), O(6), FLOAT(7) */
-	{      1,    9, ESNR,    3, ESWR,    5, ESNR,    ESNR},	// S0: NOAS
+	{      1,    7, ESNR,    3, ESWR,    5, ESNR,    ESNR},	// S0: NOAS
 	{      1, ESNR,    1, ESNR,    2,    2,    2,    ESNR},	// S1: NOAS
 	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S2: ASWR (KEY)
 	{      3,    3,    3,    4, ESWR,	3,    3,       3},	// S3: NOAS
 	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S4: ASNR (SL)
 	{      5,    5,    5,    5,    6,	5,    5,       5},	// S5: NOAS
 	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S6: ASNR (COM)
-	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S7: ASNR (ES)
-	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},  // S8: ASWR (ER)
-	{   ESNR,    9, ESNR, ESNR,   10,   10, ESWR,      10}, // S9: Reads digits, may go to float on dot
-	{     FS,   10,   FS,   FS,   FS,   FS,   FS,     ESNR}  // S10: Accepts digit after dot, floats ASWR
+	{   ESNR,    7, ESNR, ESNR,    8,    8,	  8,       8}, // S7: Reads digits, may go to float on dot
+	{     FS,    8,   FS,   FS,   FS,   FS,   FS,     ESNR},  // S8: Accepts digit after dot, floats ASWR
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S9: ASNR (ES)
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},  // S10: ASWR (ER)
 };
 
 /* Define accepting states types */
@@ -226,10 +229,10 @@ static int stateType[NUM_STATES] = {
 	FSNR, /* 04 (SL) */
 	NOFS, /* 05 */
 	FSNR, /* 06(COM) */
-	FSNR, /* 07 (Err1 - no retract) */
-	FSWR,  /* 08 (Err2 - retract) */
-	NOFS, /* 09 */
-	FSWR, /* 10 (INT_L and floats) */
+	NOFS,/* 07 */
+	FSWR,  /* 08 (INTL & FlOATS) */
+	FSNR,  /* 07 (Err1 - no retract) */
+	FSWR, /* 10 (Err2 - retract) */
 };
 
 /*
@@ -256,13 +259,13 @@ typedef Token(*PTR_ACCFUN)(char* lexeme);
 
 /* Declare accepting states functions */
 Token funcSL	(char* lexeme); // returns String Literal token
-Token funcIL	(char* lexeme); // returns integer Literal token
+Token funcNUM	(char* lexeme); // returns integer Literal token
 Token funcID	(char* lexeme); //returns ID token
 Token funcCMT   (char* lexeme);
 Token funcKEY	(char* lexeme);
 Token funcErr	(char* lexeme);
 Token funcFMT   (char* lexeme);
-Token funcNUM   (char* lexeme);
+// Token funcNUM   (char* lexeme);
 
 /* Declaring accepting state function helpers */
 int findKeywordIndex(char* lexeme);
@@ -283,11 +286,10 @@ static PTR_ACCFUN finalStateTable[NUM_STATES] = {
 	funcSL,		/* SL   [04] */
 	NULL,		/* -    [05] */
 	funcCMT,	/* COM  [06] */
-	funcErr,	/* ERR1 [07] */
-	funcErr,   /* ERR2 [08] */
-	NULL,
-	funcNUM,	/* INT_L [10] */
-
+	NULL,		/*      [07] */
+	funcNUM,	/* INT_L and FLOAT [08] */
+	funcErr,	/* ERR1 [09] */
+	funcErr,   /* ERR2 [10] */
 };
 
 /*
