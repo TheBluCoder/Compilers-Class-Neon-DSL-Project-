@@ -3,18 +3,19 @@ load model "claude"
 load model "openai-tts"
 load model "openai-embeddings"
 
-text document_text, image illustrations = doc("paper.pdf", PDF)
+text document_text = doc("paper.pdf", PDF)
+image illustrations = doc("paper.pdf", PDF)
 text summary = generate("summarize this document", document_text)
 
-using gemini:
+using "gemini":
     text extracted_text = ask("What does this image say?", illustrations)
     cache(extracted_text)
 
-using claude:
+using "claude":
     text haiku = generate("Write a haiku about the above", extracted_text)
     cache(haiku)
 
-using openai-tts:
+using "openai-tts":
     audio spoken = generate("Convert haiku to audio", haiku)
     save(spoken, "haiku.wav")
 

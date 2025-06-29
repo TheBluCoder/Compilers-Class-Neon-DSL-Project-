@@ -170,7 +170,7 @@ int main3Scanner(int argc, char** argv) {
 	}
 	/* Testbed for the scanner and add SEOF to input program buffer*/
 	/* Initialize scanner input buffer */
-	if (startScanner(sourceBuffer)) {
+	if (startScanner(sourceBuffer) != 0 ) {
 		printScannerError("%s%s", argv[0], ": Empty program buffer - scanning canceled");
 		exit(EXIT_FAILURE);
 	}

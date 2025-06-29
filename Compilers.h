@@ -127,7 +127,7 @@ typedef struct AUDIO {
 	AUDIO_FMT fmt;
 } audio ;
 
-typedef enum DOC_TYPE {
+typedef enum DOC_FMT {
 	PDF,
 	DOCX,
 	TXT,

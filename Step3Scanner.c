@@ -182,11 +182,61 @@ Token tokenizer(void) {
 		scData.scanHistogram[currentToken.code]++;
 		free(lexeme);
 		return currentToken;
+
 	case RPR_CHR:
 		currentToken.code = RPR_T;
 		scData.scanHistogram[currentToken.code]++;
 		free(lexeme);
 		return currentToken;
+
+	case COM_CHR:
+		currentToken.code = COM_T;
+		scData.scanHistogram[currentToken.code]++;
+		free(lexeme);
+		return currentToken;
+
+
+	case COLON_CHR:
+		currentToken.code = COLON_T;
+		scData.scanHistogram[currentToken.code]++;
+		free(lexeme);
+		return currentToken;
+
+	case ASSIGN_CHR:
+		currentToken.code = ASSIGN_T;
+		scData.scanHistogram[currentToken.code]++;
+		free(lexeme);
+		return currentToken;
+
+	/* Cases for Operators */
+	case PLUS_CHR:
+		currentToken.code= ARIT_OP_T;
+		currentToken.attribute.arithmeticOperator = OP_ADD;
+		scData.scanHistogram[currentToken.code]++;
+		free(lexeme);
+		return currentToken;
+
+	case MINUS_CHR:
+		currentToken.code= ARIT_OP_T;
+		currentToken.attribute.arithmeticOperator = OP_SUB;
+		scData.scanHistogram[currentToken.code]++;
+		free(lexeme);
+		return currentToken;
+
+	case MUL_CHR:
+		currentToken.code= ARIT_OP_T;
+		currentToken.attribute.arithmeticOperator = OP_MUL;
+		scData.scanHistogram[currentToken.code]++;
+		free(lexeme);
+		return currentToken;
+
+	case DIV_CHR:
+		currentToken.code= ARIT_OP_T;
+		currentToken.attribute.arithmeticOperator = OP_DIV;
+		scData.scanHistogram[currentToken.code]++;
+		free(lexeme);
+		return currentToken;
+
 	/* Cases for END OF FILE */
 	case EOS_CHR:
 		currentToken.code = SEOF_T;
@@ -194,6 +244,8 @@ Token tokenizer(void) {
 		currentToken.attribute.seofType = SEOF_0;
 		free(lexeme);
 		return currentToken;
+
+
 
 	case (char) EOF_CHR:
 		currentToken.code = SEOF_T;
@@ -211,17 +263,17 @@ Token tokenizer(void) {
 
 	default: // general case
 		state = nextState(state, c);
-		lexStart = readerGetPosRead(sourceBuffer)+1;
+		lexStart = readerGetPosRead(sourceBuffer);
 		readerSetMark(sourceBuffer, lexStart);
-		int pos = 0;
+		// int pos = 0;
 		while (stateType[state] == NOFS) {
 			c = readerGetChar(sourceBuffer);
 			state = nextState(state, c);
-			pos++;
+			// pos++;
 		}
 		if (stateType[state] == FSWR)
 			readerRetract(sourceBuffer);
-		lexEnd = readerGetPosRead(sourceBuffer);
+		lexEnd = readerGetPosRead(sourceBuffer)+1;
 		lexLength = lexEnd - lexStart;
 		// lexemeBuffer = readerCreate((int)lexLength + 2);
 		lexemeBuffer = readerCreate((int)lexLength + 1);
@@ -315,11 +367,11 @@ int nextClass(char c) {
 		val = 3;
 		break;
 	case HST_CHR:
-		val = 4;
+		val = 5;
 		break;
 	case EOS_CHR:
 	case (char) EOF_CHR:
-		val = 5;
+		val = 4;
 		break;
 	default:
 		if (isalpha(c))
@@ -327,7 +379,7 @@ int nextClass(char c) {
 		else if (isdigit(c))
 			val = 1;
 		else
-			val = 7;
+			val = 6;
 	}
 	return val;
 }
@@ -342,12 +394,12 @@ int nextClass(char c) {
 
 Token funcCMT(char* lexeme) {
 	Token currentToken = { 0 };
-	int i = 0, len = (int)strlen(lexeme);
+	// int i = 0, len = (int)strlen(lexeme);
 	currentToken.attribute.contentString = readerGetPosWrte(stringLiteralTable);
-	for (i = 1; i < len - 1; i++) {
-		if (lexeme[i] == NWL_CHR)
-			line++;
-	}
+	// for (i = 1; i < len - 1; i++) {
+	// 	if (lexeme[i] == NWL_CHR)
+	// 		line++;
+	// }
 	currentToken.code = CMT_T;
 	scData.scanHistogram[currentToken.code]++;
 	return currentToken;
@@ -404,20 +456,28 @@ Token funcIL(char* lexeme) {
 Token funcID(char* lexeme) {
 	Token currentToken = { 0 };
 	size_t length = strlen(lexeme);
-	char lastChar = lexeme[length - 1];
-	int isID = False;
-	switch (lastChar) {
-		default:
-			// Test Keyword
-			///lexeme[length - 1] = EOS_CHR;
-			currentToken = funcKEY(lexeme);
-			break;
+
+	if (length > VID_LEN) {
+		currentToken = (*finalStateTable[ESNR])(lexeme);
+		return currentToken;
 	}
-	if (isID == True) {
-		strncpy(currentToken.attribute.idLexeme, lexeme, VID_LEN);
-		currentToken.attribute.idLexeme[VID_LEN] = EOS_CHR;
-	}
+
+	strncpy(currentToken.attribute.idLexeme, lexeme, VID_LEN);
+	currentToken.code = VID_T;
+	currentToken.attribute.idLexeme[VID_LEN] = EOS_CHR;
 	return currentToken;
+}
+
+Token getToken(char* lexeme) {
+	if (findKeywordIndex(lexeme) != -1) {
+		return funcKEY(lexeme);
+	}
+	else if (findFormatIndex(lexeme) != -1) {
+		return funcFMT(lexeme);
+	}
+	else {
+		return funcID(lexeme);
+	}
 }
 
 
@@ -431,12 +491,11 @@ Token funcID(char* lexeme) {
  *   separate the lexemes. Remember also to incremente the line.
  ***********************************************************
  */
-/* TO_DO: Adjust the function for SL */
 
 Token funcSL(char* lexeme) {
 	Token currentToken = { 0 };
 	int i = 0, len = (int)strlen(lexeme);
-	currentToken.attribute.contentString = readerGetPosWrte(stringLiteralTable);
+	currentToken.attribute.contentString = readerGetPosWrte(stringLiteralTable)+1;
 	for (i = 1; i < len - 1; i++) {
 		if (lexeme[i] == NWL_CHR)
 			line++;
@@ -471,16 +530,31 @@ Token funcSL(char* lexeme) {
 
 Token funcKEY(char* lexeme) {
 	Token currentToken = { 0 };
-	int kwindex = -1, j = 0;
-	int len = (int)strlen(lexeme);
-	///lexeme[len - 1] = EOS_CHR;
-	for (j = 0; j < KWT_SIZE; j++)
-		if (!strcmp(lexeme, &keywordTable[j][0]))
-			kwindex = j;
-	if (kwindex != -1) {
+	const int kwIndex = findKeywordIndex(lexeme);
+	if (kwIndex != -1) {
 		currentToken.code = KW_T;
 		scData.scanHistogram[currentToken.code]++;
-		currentToken.attribute.codeType = kwindex;
+		currentToken.attribute.codeType = kwIndex;
+	}
+	else {
+		currentToken = funcErr(lexeme);
+	}
+	return currentToken;
+}
+
+
+/*
+************************************************************
+ * This function checks if one specific lexeme is a Format Type Token.
+ ***********************************************************
+ */
+Token funcFMT(char* lexeme) {
+	Token currentToken = { 0 };
+	const int fmIndex = findFormatIndex(lexeme);
+	if (fmIndex != -1) {
+		currentToken.code = FMT_T;
+		scData.scanHistogram[currentToken.code]++;
+		currentToken.attribute.codeType = fmIndex;
 	}
 	else {
 		currentToken = funcErr(lexeme);
@@ -520,6 +594,26 @@ Token funcErr(char* lexeme) {
 	return currentToken;
 }
 
+int findKeywordIndex(char* lexeme) {
+	for (int i = 0; i < KWT_SIZE; i++) {
+		if (strcmp(lexeme, keywordTable[i]) == 0) {
+			return i;  // Return index if found
+		}
+	}
+	return -1;  // Return -1 if not found
+}
+
+// Helper function to check if lexeme is a format token
+int findFormatIndex(char* lexeme) {
+	for (int i = 0; i < FMT_SIZE; i++) {
+		if (strcmp(lexeme, formatTable[i]) == 0) {
+			return i;  // Return index if found
+		}
+	}
+	return -1;  // Return -1 if not found
+}
+
+
 
 /*
  ************************************************************
@@ -546,8 +640,8 @@ void printToken(Token t) {
 		printf("SEOF_T\t\t%d\t\n", t.attribute.seofType);
 		break;
 	case STR_T:
-		printf("STR_T\t\t%d\t ", (int)t.attribute.codeType);
-		printf("%s\n", readerGetContent(stringLiteralTable, (int)t.attribute.codeType));
+		printf("STR_T\t\t%d\t ", (int)t.attribute.contentString);
+		printf("%s\n", readerGetContent(stringLiteralTable, (int)t.attribute.contentString));
 		break;
 	case LPR_T:
 		printf("LPR_T\n");
@@ -564,6 +658,26 @@ void printToken(Token t) {
 	case EOS_T:
 		printf("EOS_T\n");
 		break;
+	case FMT_T:
+		printf("FMT_T\t\t%s\n", formatTable[t.attribute.codeType]);
+		break;
+	case VID_T:
+		printf("VID_T\t\t%s\n", t.attribute.idLexeme);
+		break;
+	case COM_T:
+		printf("COM_T\n");
+		break;
+	case ASSIGN_T:
+		printf("ASSIGN_T\n");
+		break;
+	case COLON_T:
+		printf("COLON_T\n");
+		break;
+
+	case ARIT_OP_T:
+		printf("ARIT_OP_T\t\t%s\n", aritOpStrTable[t.attribute.arithmeticOperator]);
+		break;
+
 	default:
 		printf("Scanner error: invalid token code: %d\n", t.code);
 	}

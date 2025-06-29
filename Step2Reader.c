@@ -529,7 +529,11 @@ boolean readerRestore(BufferPointer const readerPointer) {
 	if (readerPointer->flags.isEmpty) {
 		return False;
 	}
-	readerPointer->position.read = readerPointer->position.mark;
+
+	if (readerPointer->position.mark < 0) {
+		return False;
+	}
+	readerPointer->position.read = readerPointer->position.mark -1; //position mark is the point where the lexeme began, so mark -1 will be a point just before we made the mark
 	return True;
 }
 

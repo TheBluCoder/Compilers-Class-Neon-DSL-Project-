@@ -66,26 +66,31 @@
 /* Constants */
 #define VID_LEN 20  /* variable identifier length */
 #define ERR_LEN 40  /* error message length */
-#define NUM_LEN 5   /* maximum number of digits for IL */
+#define NUM_LEN 6   /* maximum number of digits for IL */
 
 #define RTE_CODE 1  /* Value for run-time error */
 
 /* TO_DO: Define the number of tokens */
-#define NUM_TOKENS 11
+#define NUM_TOKENS 16
 
 /* TO_DO: Define Token codes - Create your token classes */
 enum TOKENS {
 	ERR_T,		/*  0: Error token */
-	INTL_T,		/*  2: Integer literal token */
-	STR_T,		/*  3: String literal token */
-	LPR_T,		/*  4: Left parenthesis token */
-	RPR_T,		/*  5: Right parenthesis token */
-	KW_T,		/*  8: Keyword token */
-	EOS_T,		/*  9: End of statement (newline) */
-	RTE_T,		/* 10: Run-time error token */
-	SEOF_T,		/* 11: Source end-of-file token */
-	CMT_T,		/* 12: Comment token */
-	FMT_T		/* 13: Format token */
+	INTL_T,		/*  1: Integer literal token */
+	STR_T,		/*  2: String literal token */
+	LPR_T,		/*  3: Left parenthesis token */
+	RPR_T,		/*  4: Right parenthesis token */
+	KW_T,		/*  5: Keyword token */
+	EOS_T,		/*  6: End of statement (newline) */
+	RTE_T,		/*  7: Run-time error token */
+	SEOF_T,		/*  8: Source end-of-file token */
+	CMT_T,		/*  9: Comment token */
+	VID_T,		/* 10: Variable Id tokens */
+	FMT_T, 		/* 11: Format Type Token */
+	COM_T,		/* 12: Comma token */
+	ASSIGN_T,	/* 13: Assignment token */
+	COLON_T,	/* 14: Colon token */
+	ARIT_OP_T,	/* 15: Arithmetic operator token */
 };
 
 /* TO_DO: Define the list of keywords */
@@ -100,7 +105,11 @@ static char* tokenStrTable[NUM_TOKENS] = {
 	"RTE_T",
 	"SEOF_T",
 	"CMT_T",
-	"FMT_T"
+	"VID_T",
+	"FMT_T",
+	"COM_T",
+	"ASSIGN_T",
+	"COLON_T",
 };
 
 /* TO_DO: Operators token attributes */
@@ -109,36 +118,38 @@ typedef enum RelationalOperators { OP_EQ, OP_NE, OP_GT, OP_LT } RelOperator;
 typedef enum LogicalOperators { OP_AND, OP_OR, OP_NOT } LogOperator;
 typedef enum SourceEndOfFile { SEOF_0, SEOF_255 } EofOperator;
 
+static char* aritOpStrTable[4] = {"+","-","*","/"};
 /* TO_DO: Data structures for declaring the token and its attributes */
 typedef union TokenAttribute {
-	int codeType;      /* integer attributes accessor */
+	int codeType;						/* integer attributes accessor */
 	AriOperator arithmeticOperator;		/* arithmetic operator attribute code */
 	RelOperator relationalOperator;		/* relational operator attribute code */
 	LogOperator logicalOperator;		/* logical operator attribute code */
 	EofOperator seofType;				/* source-end-of-file attribute code */
 	int intValue;				/* integer literal attribute (value) */
 	int keywordIndex;			/* keyword index in the keyword table */
+	int FormatIndex;			/* Format token index in the format table*/
 	int contentString;			/* string literal offset from the beginning of the string literal buffer (stringLiteralTable->content) */
 	float floatValue;				/* floating-point literal attribute (value) */
-	char idLexeme[VID_LEN + 1];	/* variable identifier token attribute */
+	char idLexeme[VID_LEN + 1];		/* variable identifier token attribute */
 	char errLexeme[ERR_LEN + 1];	/* error token attribite */
 } TokenAttribute;
 
 /* TO_DO: Should be used if no symbol table is implemented */
-typedef struct idAttibutes {
+typedef struct idAttributes {
 	unsigned char flags;			/* Flags information */
 	union {
 		int intValue;				/* Integer value */
 		float floatValue;			/* Float value */
 		char* stringContent;		/* String value */
 	} values;
-} IdAttibutes;
+} IdAttributes;
 
 /* Token declaration */
 typedef struct Token {
 	int code;				/* token code */
 	TokenAttribute attribute;	/* token attribute */
-	IdAttibutes   idAttribute;	/* not used in this scanner implementation - for further use */
+	IdAttributes   idAttribute;	/* not used in this scanner implementation - for further use */
 } Token;
 
 /* Scanner */
@@ -160,6 +171,14 @@ typedef struct scannerData {
 #define NWL_CHR '\n'	// CH07
 #define LPR_CHR '('		// CH08
 #define RPR_CHR ')'		// CH09
+#define COM_CHR ','		// CH10
+#define ASSIGN_CHR '='	// CH11
+#define COLON_CHR ':'	// CH12
+#define PLUS_CHR '+'	// CH13
+#define MINUS_CHR '-'	// CH14
+#define MUL_CHR '*'		// CH15
+#define DIV_CHR '/'		// CH16
+#define MOD_CHR '%'		// CH17
 
 
 /*  Special case tokens processed separately one by one in the token-driven part of the scanner:
@@ -180,7 +199,7 @@ static int transitionTable[NUM_STATES][CHAR_CLASSES] = {
 	/*    [A-z],[0-9],    _,   \', SEOF,    #, other
 		   L(0), D(1), U(2), Q(3), E(4), C(5),  O(6) */
 	{     1, ESNR, ESNR,    3, ESWR,	  5, ESNR},	// S0: NOAS
-	{     1,    1,    1,    2,    2,   2, ESNR},	// S1: NOAS
+	{     1,    1,    1,    2,    2,   2,    2},	// S1: NOAS
 	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S2: ASWR (KEY)
 	{     3,    3,    3,    4, ESWR,	  3,    3},	// S3: NOAS
 	{    FS,   FS,   FS,   FS,   FS,	 FS,   FS},	// S4: ASNR (SL)
@@ -231,12 +250,18 @@ Automata definitions
 typedef Token(*PTR_ACCFUN)(char* lexeme);
 
 /* Declare accepting states functions */
-Token funcSL	(char* lexeme);
-Token funcIL	(char* lexeme);
-Token funcID	(char* lexeme);
+Token funcSL	(char* lexeme); // returns String Literal token
+Token funcIL	(char* lexeme); // returns integer Literal token
+Token funcID	(char* lexeme); //returns ID token
 Token funcCMT   (char* lexeme);
 Token funcKEY	(char* lexeme);
 Token funcErr	(char* lexeme);
+Token funcFMT  (char* lexeme);
+
+/* Declaring accepting state function helpers */
+int findKeywordIndex(char* lexeme);
+int findFormatIndex(char* lexeme);
+Token getToken(char* lexeme);
 
 /* 
  * Accepting function (action) callback table (array) definition 
@@ -247,14 +272,13 @@ Token funcErr	(char* lexeme);
 static PTR_ACCFUN finalStateTable[NUM_STATES] = {
 	NULL,		/* -    [00] */
 	NULL,		/* -    [01] */
-	funcID,		/* MNID	[02] */
-	funcKEY,	/* KEY [03] */
-	NULL,		/* -    [04] */
-	funcSL,		/* SL   [05] */
-	NULL,		/* -    [06] */
-	funcCMT,	/* COM  [07] */
-	funcErr,	/* ERR1 [06] */
-	funcErr		/* ERR2 [07] */
+	getToken,	/*		[02] */  //key, id, FMT tokens
+	NULL,		/*		[03] */
+	funcSL,		/* SL   [04] */
+	NULL,		/* -    [05] */
+	funcCMT,	/* COM  [06] */
+	funcErr,	/* ERR1 [07] */
+	funcErr		/* ERR2 [08] */
 };
 
 /*
@@ -264,7 +288,7 @@ Language keywords
 */
 
 /* TO_DO: Define the number of Keywords from the language */
-#define KWT_SIZE 21
+#define KWT_SIZE 24
 
 /* TO_DO: Define the list of keywords */
 static char* keywordTable[KWT_SIZE] = {
@@ -281,17 +305,33 @@ static char* keywordTable[KWT_SIZE] = {
 	"cache", 	/* KW10 */
 	"save", 	/* KW11 */
 	"stream_in", 	/* KW12 */
-	"stream_out" 	/* KW13 */
+	"stream_out", 	/* KW13 */
 	"input", 	/* KW14 */
-	"output" 	/* KW15 */
+	"output", 	/* KW15 */
 	"True", 	/* KW16 */
-	"False" 	/* KW17 */
-	"break" 	/* KW18 */
+	"False", 	/* KW17 */
+	"break", 	/* KW18 */
 	"image",	/* KW19 */
 	"text",		/* KW20 */
-	"media"		/* KW21 */
+	"media",		/* KW21 */
+	"number",	/* KW22 */
+	"bigNumber",/* KW23 */
+};
 
-
+/* Defines the number of Formats from the language */
+#define FMT_SIZE 11
+static char* formatTable[FMT_SIZE] = {
+	"JPG",
+	"PNG",
+	"JPEG",
+	"WAV",
+	"MP4",
+	"DOCX",
+	"PDF",
+	"MP3",
+	"OGG",
+	"TXT",
+	"UNKNOWN"
 };
 
 /* NEW SECTION: About indentation */
