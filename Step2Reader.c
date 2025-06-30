@@ -387,9 +387,11 @@ int readerPrint(BufferPointer const readerPointer) {
 
 	while (currentPos < writePos) {
 		currentChar = readerPointer->content[currentPos];
-
-		if (currentChar == READER_TERMINATOR) {
-			break;  /* Stop at null terminator */
+		if (currentChar == READER_TERMINATOR && currentPos < writePos) {
+			currentChar =' ';
+		}
+		else if(currentChar == READER_TERMINATOR && currentPos == writePos) {
+			break;  /* Stop at null terminator & end of file*/
 		}
 		/* Print valid characters */
 		if (currentChar >= 32 && currentChar <= 126) {

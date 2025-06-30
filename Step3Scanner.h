@@ -190,12 +190,12 @@ typedef struct scannerData {
 
 
 /* TO_DO: Error states and illegal state */
-#define ESNR	9		/* Error state with no retract */
-#define ESWR	10		/* Error state with retract */
-#define FS		11		/* Illegal state */
+#define ESNR	10		/* Error state with no retract */
+#define ESWR	11		/* Error state with retract */
+#define FS		12		/* Illegal state */
 
  /* TO_DO: State transition table definition */
-#define NUM_STATES		11
+#define NUM_STATES		12
 #define CHAR_CLASSES	8
 
 /* TO_DO: Transition table - type of states defined in separate table */
@@ -209,10 +209,11 @@ static int  transitionTable[NUM_STATES][CHAR_CLASSES] = {
 	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S4: ASNR (SL)
 	{      5,    5,    5,    5, ESNR,	6,    5,       5},	// S5: NOAS
 	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S6: ASNR (COM)
-	{   ESNR,    7, ESNR, ESNR,    8,    8,	  8,       8}, // S7: Reads digits, may go to float on dot
-	{     FS,    8,   FS,   FS,   FS,   FS,   FS,     ESNR},  // S8: Accepts digit after dot, floats ASWR
-	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S9: ASNR (ES)
-	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},  // S10: ASWR (ER)
+	{   ESNR,    7, ESNR, ESNR,    9,    9,	  9,       8}, // S7: Reads digits, may go to float on dot NOFS
+	{   ESNR,    8, ESNR, ESNR,    9,    9,    9,    ESNR},  // S8: Accepts digit after dot, floats NOFS
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S9: ASWR (DIGIT or FLOAT)
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},	// S10: ASNR (ES)
+	{     FS,   FS,   FS,   FS,   FS,   FS,   FS,      FS},  // S11: ASWR (ER)
 };
 
 /* Define accepting states types */
@@ -230,9 +231,10 @@ static int stateType[NUM_STATES] = {
 	NOFS, /* 05 */
 	FSNR, /* 06(COM) */
 	NOFS,/* 07 */
+	NOFS,/* 08 */
 	FSWR,  /* 08 (INTL & FlOATS) */
-	FSNR,  /* 07 (Err1 - no retract) */
-	FSWR, /* 10 (Err2 - retract) */
+	FSNR, /* 10 (Err1 - no retract) */
+	FSWR,/* 11 (Err2 - retract) */
 };
 
 /*
@@ -287,9 +289,10 @@ static PTR_ACCFUN finalStateTable[NUM_STATES] = {
 	NULL,		/* -    [05] */
 	funcCMT,	/* COM  [06] */
 	NULL,		/*      [07] */
-	funcNUM,	/* INT_L and FLOAT [08] */
-	funcErr,	/* ERR1 [09] */
-	funcErr,   /* ERR2 [10] */
+	NULL,		/*		[08] */
+	funcNUM,	/* INT_L and FLOAT [09] */
+	funcErr,	/* ERR1 [10] */
+	funcErr,   /* ERR2 [11] */
 };
 
 /*
