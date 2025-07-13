@@ -131,7 +131,7 @@ typedef union TokenAttribute {
 	EofOperator seofType;				/* source-end-of-file attribute code */
 	int intValue;				/* integer literal attribute (value) */
 	int keywordIndex;			/* keyword index in the keyword table */
-	int FormatIndex;			/* Format token index in the format table*/
+	int formatIndex;			/* Format token index in the format table*/
 	int contentString;			/* string literal offset from the beginning of the string literal buffer (stringLiteralTable->content) */
 	double floatValue;				/* floating-point literal attribute (value) */
 	char idLexeme[VID_LEN + 1];		/* variable identifier token attribute */

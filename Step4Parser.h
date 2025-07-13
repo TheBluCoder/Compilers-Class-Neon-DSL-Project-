@@ -108,6 +108,7 @@ enum KEYWORDS {
 	KW_console,
 	KW_file,
 	KW_embedding,
+	KW_embed,
 };
 
 /* TO_DO: Define the number of BNF rules */

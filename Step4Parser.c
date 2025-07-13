@@ -173,6 +173,15 @@ void printError() {
 	case EOS_T:
 		printf("NA\n");
 		break;
+	case COM_T:
+		printf("COMMA\n");
+		break;
+	case VID_T:
+		printf("VID_T: %s\n", t.attribute.idLexeme);
+		break;
+	case FMT_T:
+		printf("FMT_T: %s\n", formatTable[t.attribute.formatIndex]);
+		break;
 	default:
 		printf("%s%s%d\n", STR_LANGNAME, ": Scanner error: invalid token code: ", t.code);
 		numParserErrors++; // Updated parser error
@@ -388,11 +397,12 @@ void statement() {
 			case KW_image:
 			case KW_text:
 			case KW_audio:
-			case KW_embedding:
-				printf("Got here\n");
+			case KW_file:
+			case KW_media:
+			case KW_doc:
 				static_assignment();
 				break;
-			case  KW_using:
+			case KW_using:
 				model_block();
 				break;
 			default:
@@ -472,11 +482,9 @@ void load_model() {
 	printf("%s%s %s parsed\n", STR_LANGNAME, ": Load model ", modelName);
 }
 
-int isDatatype(TokenAttribute t) {
-	printf("\n%d", t.codeType);
-	const char* datatypes[8]={"text", "file", "number", "bigNumber", "embedding","image", "audio"} ;
-	int i;
-	for (i = 0; i < 8; i++) {
+int isDatatype(const TokenAttribute t) {
+	const char* datatypes[9] = {"text", "image", "audio", "embedding", "number", "bigNumber", "file","media","doc"};
+	for (int i = 0; i < 9; i++) {
 		if (strcmp(datatypes[i], keywordTable[t.codeType]) == 0) {
 			return t.codeType;
 		}
@@ -484,13 +492,60 @@ int isDatatype(TokenAttribute t) {
 	return -1;
 }
 
-void stream_statement() {}
+void stream_statement() {
+	psData.parsHistogram[BNF_stream_statement]++;
+	switch (lookahead.attribute.codeType) {
+		case KW_stream_in:
+			matchToken(KW_T, KW_stream_in);
+			matchToken(LPR_T, NO_ATTR);
+			source_expr();
+			matchToken(COM_T, NO_ATTR);
+			format();
+			matchToken(RPR_T, NO_ATTR);
+			matchToken(EOS_T, NO_ATTR);
+			break;
+		case KW_stream_out:
+			matchToken(KW_T, KW_stream_out);
+			matchToken(LPR_T, NO_ATTR);
+			id();
+			matchToken(COM_T, NO_ATTR);
+			dest_expr();
+			matchToken(RPR_T, NO_ATTR);
+			matchToken(EOS_T, NO_ATTR);
+			break;
+		default:
+			printError();
+			break;
+	}
+	printf("%s%s\n", STR_LANGNAME, ": Stream statement parsed");
+}
 
 void static_assignment() {
-	psData.parsHistogram[ BNF_static_assignment]++;
+	psData.parsHistogram[BNF_static_assignment]++;
 	type();
 	id();
-	load_expr();
+	matchToken(ASSIGN_T, NO_ATTR);
+	
+	// Check if it's a load expression (static) or operation expression (dynamic)
+	switch (lookahead.attribute.codeType) {
+		case KW_doc:
+		case KW_file:
+		case KW_image:
+		case KW_audio:
+		case KW_media:
+			load_expr();
+			break;
+		case KW_ask:
+		case KW_generate:
+		case KW_embed:
+			operation_expr();
+			break;
+		default:
+			printError();
+			break;
+	}
+	
+	matchToken(EOS_T, NO_ATTR);
 	printf("%s%s\n", STR_LANGNAME, ": Static assignment parsed");
 }
 void model_block() {
@@ -522,6 +577,7 @@ void load_expr() {
 	else {
 		syncErrorHandler(lookahead.code);
 	}
+	matchToken(COM_T, NO_ATTR);
 	format();
 	matchToken(RPR_T, NO_ATTR);
 }
@@ -534,6 +590,134 @@ void format() {
 
 void model_body() {
 	psData.parsHistogram[BNF_model_body]++;
+	
+	while (lookahead.code != SEOF_T) {
+		if (lookahead.code == EOS_T) {
+			matchToken(EOS_T, NO_ATTR);
+			continue;
+		}
+		
+		switch (lookahead.code) {
+			case KW_T:
+				switch (lookahead.attribute.codeType) {
+					case KW_text:
+					case KW_image:
+					case KW_audio:
+					case KW_embedding:
+						// Static assignment: type id = operation_expr
+						static_assignment();
+						break;
+					case KW_cache:
+						cache_statement();
+						break;
+					case KW_save:
+						save_statement();
+						break;
+					default:
+						printError();
+						break;
+				}
+				break;
+			default:
+				printError();
+				break;
+		}
+	}
+	printf("%s%s\n", STR_LANGNAME, ": Model body parsed");
+}
 
+void cache_statement() {
+	psData.parsHistogram[BNF_cache_statement]++;
+	matchToken(KW_T, KW_cache);
+	matchToken(LPR_T, NO_ATTR);
+	id();
+	matchToken(RPR_T, NO_ATTR);
+	matchToken(EOS_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Cache statement parsed");
+}
+
+void save_statement() {
+	psData.parsHistogram[BNF_save_statement]++;
+	matchToken(KW_T, KW_save);
+	matchToken(LPR_T, NO_ATTR);
+	id();
+	matchToken(COM_T, NO_ATTR);
+	matchToken(STR_T, NO_ATTR);
+	matchToken(RPR_T, NO_ATTR);
+	matchToken(EOS_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Save statement parsed");
+}
+
+// void dynamic_assignment() {
+// 	psData.parsHistogram[BNF_dynamic_assignment]++;
+// 	type();
+// 	id();
+// 	matchToken(ASSIGN_T, NO_ATTR);
+// 	operation_expr();
+// 	matchToken(EOS_T, NO_ATTR);
+// 	printf("%s%s\n", STR_LANGNAME, ": Dynamic assignment parsed");
+// }
+
+void operation_expr() {
+	psData.parsHistogram[BNF_operation_expr]++;
+	switch (lookahead.attribute.codeType) {
+		case KW_ask:
+		case KW_generate:
+			matchToken(KW_T, lookahead.attribute.codeType);
+			matchToken(LPR_T, NO_ATTR);
+			matchToken(STR_T, NO_ATTR);
+			if (lookahead.code == COM_T) {
+				matchToken(COM_T, NO_ATTR);
+				id();
+			}
+			matchToken(RPR_T, NO_ATTR);
+			break;
+		case KW_embed:
+			matchToken(KW_T, lookahead.attribute.codeType);
+			matchToken(LPR_T, NO_ATTR);
+			id();
+			matchToken(RPR_T, NO_ATTR);
+			break;
+		default:
+			printError();
+			break;
+	}
+	printf("%s%s\n", STR_LANGNAME, ": Operation expression parsed");
+}
+
+void source_expr() {
+	psData.parsHistogram[BNF_source_expr]++;
+	switch (lookahead.code) {
+		case VID_T:
+			id();
+			break;
+		case STR_T:
+			matchToken(STR_T, NO_ATTR);
+			break;
+		default:
+			printError();
+			break;
+	}
+	printf("%s%s\n", STR_LANGNAME, ": Source expression parsed");
+}
+
+void dest_expr() {
+	psData.parsHistogram[BNF_dest_expr]++;
+	switch (lookahead.code) {
+		case KW_T:
+			if (lookahead.attribute.codeType == KW_console) {
+				matchToken(KW_T, KW_console);
+			} else {
+				printError();
+			}
+			break;
+		case STR_T:
+			matchToken(STR_T, NO_ATTR);
+			break;
+		default:
+			printError();
+			break;
+	}
+	printf("%s%s\n", STR_LANGNAME, ": Destination expression parsed");
 }
 
