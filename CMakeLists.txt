@@ -43,6 +43,8 @@ add_executable (Compilers
         "Main2Reader.c"
         "Step3Scanner.c"
         "Main3Scanner.c"
+        Main4Parser.c
+        Step4Parser.c
 )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

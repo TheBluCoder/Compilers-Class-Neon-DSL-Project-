@@ -69,6 +69,8 @@
 #define INVALID NULL
 #define EOF_CHAR '\0'
 
+#include  <stdlib.h>
+
 /*
 ------------------------------------------------------------
 Data types definitions
@@ -160,6 +162,7 @@ Main functions signatures
 int main1Coder	(int argc, text* argv);
 int main2Reader(int argc, char** argv);
 int main3Scanner(int argc, char** argv);
+int main4Parser(int argc, char** argv);
 void printLogo();
 void errorPrint(text fmt, ...);
 

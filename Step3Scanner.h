@@ -302,7 +302,7 @@ Language keywords
 */
 
 /* TO_DO: Define the number of Keywords from the language */
-#define KWT_SIZE 24
+#define KWT_SIZE 28
 
 /* TO_DO: Define the list of keywords */
 static char* keywordTable[KWT_SIZE] = {
@@ -330,6 +330,10 @@ static char* keywordTable[KWT_SIZE] = {
 	"media",		/* KW21 */
 	"number",	/* KW22 */
 	"bigNumber",/* KW23 */
+	"audio", /* KW24 */
+	"console", /* KW25 */
+	"file",		/* KW26 */
+	"embedding", /* KW27 */
 };
 
 /* Defines the number of Formats from the language */

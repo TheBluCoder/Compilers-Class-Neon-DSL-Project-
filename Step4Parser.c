@@ -1,0 +1,539 @@
+﻿/*
+************************************************************
+* COMPILERS COURSE - Algonquin College
+* Code version: Fall, 2024
+* Author: TO_DO
+* Professors: Paulo Sousa
+************************************************************
+#
+# "=---------------------------------------="
+# "|  COMPILERS - ALGONQUIN COLLEGE (F24)  |"
+# "=---------------------------------------="
+# "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
+# "    @@                             @@    ”
+# "    @@           %&@@@@@@@@@@@     @@    ”
+# "    @@       @%% (@@@@@@@@@  @     @@    ”
+# "    @@      @& @   @ @       @     @@    ”
+# "    @@     @ @ %  / /   @@@@@@     @@    ”
+# "    @@      & @ @  @@              @@    ”
+# "    @@       @/ @*@ @ @   @        @@    ”
+# "    @@           @@@@  @@ @ @      @@    ”
+# "    @@            /@@    @@@ @     @@    ”
+# "    @@     @      / /     @@ @     @@    ”
+# "    @@     @ @@   /@/   @@@ @      @@    ”
+# "    @@     @@@@@@@@@@@@@@@         @@    ”
+# "    @@                             @@    ”
+# "    @@         S O F I A           @@    ”
+# "    @@                             @@    ”
+# "    @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@    ”
+# "                                         "
+# "[READER SCRIPT .........................]"
+# "                                         "
+*/
+
+
+/*
+************************************************************
+* File name: Parser.c
+* Compiler: MS Visual Studio 2022
+* Course: CST 8152 – Compilers, Lab Section: [011, 012]
+* Assignment: A32.
+* Date: May 01 2023
+* Purpose: This file contains all functionalities from Parser.
+* Function list: (...).
+************************************************************
+*/
+
+/* TO_DO: Adjust the function header */
+
+#ifndef COMPILERS_H_
+#include "Compilers.h"
+#endif
+
+#ifndef SCANNER_H_
+#include "Step3Scanner.h"
+#endif
+
+#ifndef PARSER_H_
+#include "Step4Parser.h"
+#endif
+
+/* Parser data */
+extern ParserData psData; /* BNF statistics */
+
+/*
+************************************************************
+ * Process Parser
+ ***********************************************************
+ */
+/* TO_DO: This is the function to start the parser - check your program definition */
+
+void startParser() {
+	/* TO_DO: Initialize Parser data */
+	int i = 0;
+	for (i = 0; i < NUM_BNF_RULES; i++) {
+		psData.parsHistogram[i] = 0;
+	}
+	/* Proceed parser */
+	lookahead = tokenizer();
+	if (lookahead.code != SEOF_T) {
+		program();
+	}
+	matchToken(SEOF_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Source file parsed");
+}
+
+
+/*
+ ************************************************************
+ * Match Token
+ ***********************************************************
+ */
+/* TO_DO: This is the main code for match - check your definition */
+void matchToken(int tokenCode, int tokenAttribute) {
+	int matchFlag = 1;
+	switch (lookahead.code) {
+		case KW_T:
+			if (lookahead.attribute.codeType != tokenAttribute)
+				matchFlag = 0;
+			break;
+		case VID_T:
+				if (strlen(lookahead.attribute.idLexeme) < 1) {
+					matchFlag = 0;
+				}
+				break;
+		case FMT_T:
+		default:
+			if (lookahead.code != tokenCode)
+				matchFlag = 0;
+			break;
+	}
+	if (matchFlag && lookahead.code == SEOF_T)
+		return;
+	if (matchFlag) {
+		lookahead = tokenizer();
+		if (lookahead.code == ERR_T) {
+			printError();
+			lookahead = tokenizer();
+			syntaxErrorNumber++;
+		}
+	}
+	else
+		syncErrorHandler(tokenCode);
+}
+
+/*
+ ************************************************************
+ * Syncronize Error Handler
+ ***********************************************************
+ */
+/* TO_DO: This is the function to handler error - adjust basically datatypes */
+void syncErrorHandler(int syncTokenCode) {
+	printError();
+	syntaxErrorNumber++;
+	while (lookahead.code != syncTokenCode) {
+		if (lookahead.code == SEOF_T)
+			exit(syntaxErrorNumber);
+		lookahead = tokenizer();
+	}
+	if (lookahead.code != SEOF_T)
+		lookahead = tokenizer();
+}
+
+/*
+ ************************************************************
+ * Print Error
+ ***********************************************************
+ */
+/* TO_DO: This is the function to error printing - adjust basically datatypes */
+void printError() {
+	// extern int numParserErrors;			/* link to number of errors (defined in Parser.h) */
+	Token t = lookahead;
+	printf("%s%s%3d\n", STR_LANGNAME, ": Syntax error:  Line:", line);
+	printf("*****  Token code:%3d Attribute: ", t.code);
+	switch (t.code) {
+	case ERR_T:
+		printf("*ERROR*: %s\n", t.attribute.errLexeme);
+		break;
+	case SEOF_T:
+		printf("SEOF_T\t\t%d\t\n", t.attribute.seofType);
+		break;
+	case STR_T:
+		printf("STR_T: %s\n", readerGetContent(stringLiteralTable, t.attribute.contentString));
+		break;
+	case KW_T:
+		printf("KW_T: %s\n", keywordTable[t.attribute.codeType]);
+		break;
+	case LPR_T:
+		printf("LPR_T\n");
+		break;
+	case RPR_T:
+		printf("RPR_T\n");
+		break;
+	case EOS_T:
+		printf("NA\n");
+		break;
+	default:
+		printf("%s%s%d\n", STR_LANGNAME, ": Scanner error: invalid token code: ", t.code);
+		numParserErrors++; // Updated parser error
+	}
+}
+
+/*
+ ************************************************************
+ * Program statement
+ * BNF: <program> -> main& { <opt_statements> }
+ * FIRST(<program>)= {CMT_T, MNID_T (main&), SEOF_T}.
+ ***********************************************************
+ */
+void program() {
+	psData.parsHistogram[BNF_program]++;
+	switch (lookahead.code) {
+	case CMT_T:
+		while (lookahead.code == CMT_T) {
+			comment();
+		}
+	case KW_T:
+		statement();
+	case SEOF_T:
+		; // Empty
+		break;
+	default:
+		printError();
+	}
+	printf("%s%s\n", STR_LANGNAME, ": Program parsed");
+}
+
+/*
+ ************************************************************
+ * comment
+ * BNF: comment
+ * FIRST(<comment>)= {CMT_T}.
+ ***********************************************************
+ */
+void comment() {
+	psData.parsHistogram[BNF_comment]++;
+	matchToken(CMT_T, NO_ATTR);
+	printf("%s%s\n", STR_LANGNAME, ": Comment parsed");
+}
+
+
+/*
+ ************************************************************
+ * optParams
+ * BNF: <optParams> -> <paramList> | e
+ * FIRST(<optParams>) = { e, KW_T (KW_int), KW_T (KW_real), KW_T (KW_string)}.
+ ***********************************************************
+ */
+// void optParams() {
+// 	psData.parsHistogram[BNF_optParams]++;
+// 	switch (lookahead.code) {
+// 	case CMT_T:
+// 		comment();
+// 	case KW_T:
+// 		paramList();
+// 	default:
+// 		; // Empty
+// 	}
+// 	printf("%s%s\n", STR_LANGNAME, ": Optional param list parsed");
+// }
+//
+// /*
+//  ************************************************************
+//  * paramList
+//  * BNF: <paramList> -> <opt_varlist_declarations>
+//  * FIRST(<paramList>) = { KW_T (KW_int), KW_T (KW_real), KW_T (KW_string)}.
+//  ***********************************************************
+//  */
+// void paramList() {
+// 	psData.parsHistogram[BNF_optParams]++;
+// 	switch (lookahead.attribute.codeType) {
+// 	default:
+// 		break;
+// 	}
+// 	printf("%s%s\n", STR_LANGNAME, ": Param list parsed");
+// }
+//
+// /*
+//  ************************************************************
+//  * dataSession
+//  * BNF: <dataSession> -> data { <opt_varlist_declarations> }
+//  * FIRST(<program>)= {KW_T (KW_data)}.
+//  ***********************************************************
+//  */
+// void dataSession() {
+// 	psData.parsHistogram[BNF_dataSession]++;
+// 	switch (lookahead.code) {
+// 	case CMT_T:
+// 		comment();
+// 	default:
+// 		matchToken(KW_T, KW_data);
+// 		optVarListDeclarations();
+// 		printf("%s%s\n", STR_LANGNAME, ": Data Session parsed");
+// 	}
+// }
+//
+// /*
+//  ************************************************************
+//  * Optional Var List Declarations
+//  * BNF: <opt_varlist_declarations> -> <varlist_declarations> | e
+//  * FIRST(<opt_varlist_declarations>) = { e, KW_T (KW_int), KW_T (KW_real), KW_T (KW_string)}.
+//  ***********************************************************
+//  */
+// void optVarListDeclarations() {
+// 	psData.parsHistogram[BNF_optVarListDeclarations]++;
+// 	switch (lookahead.code) {
+// 	default:
+// 		; // Empty
+// 	}
+// 	printf("%s%s\n", STR_LANGNAME, ": Optional Variable List Declarations parsed");
+// }
+//
+// /*
+//  ************************************************************
+//  * codeSession statement
+//  * BNF: <codeSession> -> code { <opt_statements> }
+//  * FIRST(<codeSession>)= {KW_T (KW_code)}.
+//  ***********************************************************
+//  */
+// void codeSession() {
+// 	psData.parsHistogram[BNF_codeSession]++;
+// 	switch (lookahead.code) {
+// 	case CMT_T:
+// 		comment();
+// 	default:
+// 		matchToken(KW_T, KW_code);
+// 		optionalStatements();
+// 		printf("%s%s\n", STR_LANGNAME, ": Code Session parsed");
+// 	}
+// }
+//
+// /* TO_DO: Continue the development (all non-terminal functions) */
+//
+// /*
+//  ************************************************************
+//  * Optional statement
+//  * BNF: <opt_statements> -> <statements> | ϵ
+//  * FIRST(<opt_statements>) = { ϵ , IVID_T, FVID_T, SVID_T, KW_T(KW_if),
+//  *				KW_T(KW_while), MNID_T(print&), MNID_T(input&) }
+//  ***********************************************************
+//  */
+// void optionalStatements() {
+// 	psData.parsHistogram[BNF_optionalStatements]++;
+// 	switch (lookahead.code) {
+// 	case CMT_T:
+// 		comment();
+// 	default:
+// 		; // Empty
+// 	}
+// 	printf("%s%s\n", STR_LANGNAME, ": Optional statements parsed");
+// }
+//
+// /*
+//  ************************************************************
+//  * Statements
+//  * BNF: <statements> -> <statement><statementsPrime>
+//  * FIRST(<statements>) = { IVID_T, FVID_T, SVID_T, KW_T(KW_if),
+//  *		KW_T(KW_while), MNID_T(input&), MNID_T(print&) }
+//  ***********************************************************
+//  */
+// void statements() {
+// 	psData.parsHistogram[BNF_statements]++;
+// 	statement();
+// 	statementsPrime();
+// 	printf("%s%s\n", STR_LANGNAME, ": Statements parsed");
+// }
+//
+// /*
+//  ************************************************************
+//  * Statements Prime
+//  * BNF: <statementsPrime> -> <statement><statementsPrime> | ϵ
+//  * FIRST(<statementsPrime>) = { ϵ , IVID_T, FVID_T, SVID_T,
+//  *		KW_T(KW_if), KW_T(KW_while), MNID_T(input&), MNID_T(print&) }
+//  ***********************************************************
+//  */
+// void statementsPrime() {
+// 	psData.parsHistogram[BNF_statementsPrime]++;
+// 	switch (lookahead.code) {
+// 	default:
+// 		; //empty string
+// 	}
+// }
+
+/*
+ ************************************************************
+ * Single statement
+ * BNF: <statement> -> <assignment statement> | <selection statement> |
+ *	<iteration statement> | <input statement> | <output statement>
+ * FIRST(<statement>) = { IVID_T, FVID_T, SVID_T, KW_T(KW_if), KW_T(KW_while),
+ *			MNID_T(input&), MNID_T(print&) }
+ ***********************************************************
+ */
+void statement() {
+	psData.parsHistogram[BNF_statement]++;
+
+	while (lookahead.code != SEOF_T ) {
+		if (lookahead.code == EOS_T) {
+			matchToken(EOS_T, NO_ATTR);
+			continue;
+		}
+		switch (lookahead.attribute.codeType) {
+			case KW_load:
+				load_model();
+				break;
+			case KW_stream_in:
+			case KW_stream_out:
+				stream_statement();
+				break;
+			case KW_image:
+			case KW_text:
+			case KW_audio:
+			case KW_embedding:
+				printf("Got here\n");
+				static_assignment();
+				break;
+			case  KW_using:
+				model_block();
+				break;
+			default:
+				printError();
+			}
+	}
+	printf("%s%s\n", STR_LANGNAME, ": Statement parsed");
+}
+
+/*
+ ************************************************************
+ * Output Statement
+ * BNF: <output statement> -> print& (<output statementPrime>);
+ * FIRST(<output statement>) = { MNID_T(print&) }
+ ***********************************************************
+ */
+// void outputStatement() {
+// 	psData.parsHistogram[BNF_outputStatement]++;
+// 	matchToken(LPR_T, NO_ATTR);
+// 	outputVariableList();
+// 	matchToken(RPR_T, NO_ATTR);
+// 	matchToken(EOS_T, NO_ATTR);
+// 	printf("%s%s\n", STR_LANGNAME, ": Output statement parsed");
+// }
+
+/*
+ ************************************************************
+ * Output Variable List
+ * BNF: <opt_variable list> -> <variable list> | ϵ
+ * FIRST(<opt_variable_list>) = { IVID_T, FVID_T, SVID_T, ϵ }
+ ***********************************************************
+ */
+// void outputVariableList() {
+// 	psData.parsHistogram[BNF_outputVariableList]++;
+// 	switch (lookahead.code) {
+// 	case STR_T:
+// 		matchToken(STR_T, NO_ATTR);
+// 		break;
+// 	default:
+// 		;
+// 	}
+// 	printf("%s%s\n", STR_LANGNAME, ": Output variable list parsed");
+// }
+
+/*
+ ************************************************************
+ * The function prints statistics of BNF rules
+ * Param:
+ *	- Parser data
+ * Return:
+ *	- Void (procedure)
+ ***********************************************************
+ */
+/*
+void printBNFData(ParserData psData) {
+}
+*/
+void printBNFData(ParserData psData) {
+	/* Print Parser statistics */
+	printf("Statistics:\n");
+	printf("----------------------------------\n");
+	int cont = 0;
+	for (cont = 0; cont < NUM_BNF_RULES; cont++) {
+		if (psData.parsHistogram[cont] > 0)
+			printf("%s%s%s%d%s", "Token[", BNFStrTable[cont], "]=", psData.parsHistogram[cont], "\n");
+	}
+	printf("----------------------------------\n");
+}
+
+void load_model() {
+	psData.parsHistogram[BNF_load_model]++;
+	matchToken(KW_T, KW_load);
+	matchToken(KW_T, KW_model);
+	char *modelName = readerGetContent(stringLiteralTable, lookahead.attribute.contentString);
+	matchToken(STR_T, NO_ATTR);
+	matchToken(EOS_T, NO_ATTR);
+	printf("%s%s %s parsed\n", STR_LANGNAME, ": Load model ", modelName);
+}
+
+int isDatatype(TokenAttribute t) {
+	printf("\n%d", t.codeType);
+	const char* datatypes[8]={"text", "file", "number", "bigNumber", "embedding","image", "audio"} ;
+	int i;
+	for (i = 0; i < 8; i++) {
+		if (strcmp(datatypes[i], keywordTable[t.codeType]) == 0) {
+			return t.codeType;
+		}
+	}
+	return -1;
+}
+
+void stream_statement() {}
+
+void static_assignment() {
+	psData.parsHistogram[ BNF_static_assignment]++;
+	type();
+	id();
+	load_expr();
+	printf("%s%s\n", STR_LANGNAME, ": Static assignment parsed");
+}
+void model_block() {
+	psData.parsHistogram[BNF_model_block]++;
+	matchToken(KW_T, KW_using);
+	matchToken(STR_T, NO_ATTR);
+	matchToken(COLON_T, NO_ATTR);
+	model_body();
+	printf("%s%s\n", STR_LANGNAME, ": Model block parsed");
+}
+void type() {
+	psData.parsHistogram[BNF_type]++;
+	matchToken(KW_T, isDatatype(lookahead.attribute));
+}
+void id() {
+	psData.parsHistogram[BNF_id]++;
+	matchToken(VID_T, NO_ATTR);
+}
+void load_expr() {
+	psData.parsHistogram[BNF_load_expr]++;
+	type();
+	matchToken(LPR_T, NO_ATTR);
+	if (lookahead.code == STR_T) {
+		matchToken(STR_T, NO_ATTR);
+	}
+	else if (lookahead.code == VID_T) {
+		id();
+	}
+	else {
+		syncErrorHandler(lookahead.code);
+	}
+	format();
+	matchToken(RPR_T, NO_ATTR);
+}
+
+
+void format() {
+	psData.parsHistogram[BNF_format]++;
+	matchToken(FMT_T, NO_ATTR);
+}
+
+void model_body() {
+	psData.parsHistogram[BNF_model_body]++;
+
+}
+
