@@ -215,12 +215,9 @@ void program();
 void statements();
 void comment();
 void assignment();
-// void dynamic_assignment();
 void load_expr();
-void multi_load_expr();
 void model_context_block();
 void model_context_body();
-// void context_block();
 void operation_expr();
 void cache_statement();
 void save_statement();
@@ -230,8 +227,6 @@ void source_expr();
 void dest_expr();
 void type();
 void format();
-void img_format();
-void audio_format();
 void id();
 
 

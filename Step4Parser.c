@@ -58,8 +58,8 @@
 #include "Step4Parser.h"
 #endif
 
-/* Parser data */
-extern ParserData psData; /* BNF statistics */
+
+/* BNF statistics */
 
 /*
 ************************************************************
@@ -228,158 +228,6 @@ void comment() {
 	printf("%s%s\n", STR_LANGNAME, ": Comment parsed");
 }
 
-
-/*
- ************************************************************
- * optParams
- * BNF: <optParams> -> <paramList> | e
- * FIRST(<optParams>) = { e, KW_T (KW_int), KW_T (KW_real), KW_T (KW_string)}.
- ***********************************************************
- */
-// void optParams() {
-// 	psData.parsHistogram[BNF_optParams]++;
-// 	switch (lookahead.code) {
-// 	case CMT_T:
-// 		comment();
-// 	case KW_T:
-// 		paramList();
-// 	default:
-// 		; // Empty
-// 	}
-// 	printf("%s%s\n", STR_LANGNAME, ": Optional param list parsed");
-// }
-//
-// /*
-//  ************************************************************
-//  * paramList
-//  * BNF: <paramList> -> <opt_varlist_declarations>
-//  * FIRST(<paramList>) = { KW_T (KW_int), KW_T (KW_real), KW_T (KW_string)}.
-//  ***********************************************************
-//  */
-// void paramList() {
-// 	psData.parsHistogram[BNF_optParams]++;
-// 	switch (lookahead.attribute.codeType) {
-// 	default:
-// 		break;
-// 	}
-// 	printf("%s%s\n", STR_LANGNAME, ": Param list parsed");
-// }
-//
-// /*
-//  ************************************************************
-//  * dataSession
-//  * BNF: <dataSession> -> data { <opt_varlist_declarations> }
-//  * FIRST(<program>)= {KW_T (KW_data)}.
-//  ***********************************************************
-//  */
-// void dataSession() {
-// 	psData.parsHistogram[BNF_dataSession]++;
-// 	switch (lookahead.code) {
-// 	case CMT_T:
-// 		comment();
-// 	default:
-// 		matchToken(KW_T, KW_data);
-// 		optVarListDeclarations();
-// 		printf("%s%s\n", STR_LANGNAME, ": Data Session parsed");
-// 	}
-// }
-//
-// /*
-//  ************************************************************
-//  * Optional Var List Declarations
-//  * BNF: <opt_varlist_declarations> -> <varlist_declarations> | e
-//  * FIRST(<opt_varlist_declarations>) = { e, KW_T (KW_int), KW_T (KW_real), KW_T (KW_string)}.
-//  ***********************************************************
-//  */
-// void optVarListDeclarations() {
-// 	psData.parsHistogram[BNF_optVarListDeclarations]++;
-// 	switch (lookahead.code) {
-// 	default:
-// 		; // Empty
-// 	}
-// 	printf("%s%s\n", STR_LANGNAME, ": Optional Variable List Declarations parsed");
-// }
-//
-// /*
-//  ************************************************************
-//  * codeSession statement
-//  * BNF: <codeSession> -> code { <opt_statements> }
-//  * FIRST(<codeSession>)= {KW_T (KW_code)}.
-//  ***********************************************************
-//  */
-// void codeSession() {
-// 	psData.parsHistogram[BNF_codeSession]++;
-// 	switch (lookahead.code) {
-// 	case CMT_T:
-// 		comment();
-// 	default:
-// 		matchToken(KW_T, KW_code);
-// 		optionalStatements();
-// 		printf("%s%s\n", STR_LANGNAME, ": Code Session parsed");
-// 	}
-// }
-//
-// /* TO_DO: Continue the development (all non-terminal functions) */
-//
-// /*
-//  ************************************************************
-//  * Optional statement
-//  * BNF: <opt_statements> -> <statements> | ϵ
-//  * FIRST(<opt_statements>) = { ϵ , IVID_T, FVID_T, SVID_T, KW_T(KW_if),
-//  *				KW_T(KW_while), MNID_T(print&), MNID_T(input&) }
-//  ***********************************************************
-//  */
-// void optionalStatements() {
-// 	psData.parsHistogram[BNF_optionalStatements]++;
-// 	switch (lookahead.code) {
-// 	case CMT_T:
-// 		comment();
-// 	default:
-// 		; // Empty
-// 	}
-// 	printf("%s%s\n", STR_LANGNAME, ": Optional statements parsed");
-// }
-//
-// /*
-//  ************************************************************
-//  * Statements
-//  * BNF: <statements> -> <statement><statementsPrime>
-//  * FIRST(<statements>) = { IVID_T, FVID_T, SVID_T, KW_T(KW_if),
-//  *		KW_T(KW_while), MNID_T(input&), MNID_T(print&) }
-//  ***********************************************************
-//  */
-// void statements() {
-// 	psData.parsHistogram[BNF_statements]++;
-// 	statement();
-// 	statementsPrime();
-// 	printf("%s%s\n", STR_LANGNAME, ": Statements parsed");
-// }
-//
-// /*
-//  ************************************************************
-//  * Statements Prime
-//  * BNF: <statementsPrime> -> <statement><statementsPrime> | ϵ
-//  * FIRST(<statementsPrime>) = { ϵ , IVID_T, FVID_T, SVID_T,
-//  *		KW_T(KW_if), KW_T(KW_while), MNID_T(input&), MNID_T(print&) }
-//  ***********************************************************
-//  */
-// void statementsPrime() {
-// 	psData.parsHistogram[BNF_statementsPrime]++;
-// 	switch (lookahead.code) {
-// 	default:
-// 		; //empty string
-// 	}
-// }
-
-/*
- ************************************************************
- * Single statement
- * BNF: <statement> -> <assignment statement> | <selection statement> |
- *	<iteration statement> | <input statement> | <output statement>
- * FIRST(<statement>) = { IVID_T, FVID_T, SVID_T, KW_T(KW_if), KW_T(KW_while),
- *			MNID_T(input&), MNID_T(print&) }
- ***********************************************************
- */
 void statements() {
 	psData.parsHistogram[BNF_statements]++;
 
@@ -420,54 +268,6 @@ void statements() {
 	printf("%s%s\n", STR_LANGNAME, ": Statement parsed");
 }
 
-/*
- ************************************************************
- * Output Statement
- * BNF: <output statement> -> print& (<output statementPrime>);
- * FIRST(<output statement>) = { MNID_T(print&) }
- ***********************************************************
- */
-// void outputStatement() {
-// 	psData.parsHistogram[BNF_outputStatement]++;
-// 	matchToken(LPR_T, NO_ATTR);
-// 	outputVariableList();
-// 	matchToken(RPR_T, NO_ATTR);
-// 	matchToken(EOS_T, NO_ATTR);
-// 	printf("%s%s\n", STR_LANGNAME, ": Output statement parsed");
-// }
-
-/*
- ************************************************************
- * Output Variable List
- * BNF: <opt_variable list> -> <variable list> | ϵ
- * FIRST(<opt_variable_list>) = { IVID_T, FVID_T, SVID_T, ϵ }
- ***********************************************************
- */
-// void outputVariableList() {
-// 	psData.parsHistogram[BNF_outputVariableList]++;
-// 	switch (lookahead.code) {
-// 	case STR_T:
-// 		matchToken(STR_T, NO_ATTR);
-// 		break;
-// 	default:
-// 		;
-// 	}
-// 	printf("%s%s\n", STR_LANGNAME, ": Output variable list parsed");
-// }
-
-/*
- ************************************************************
- * The function prints statistics of BNF rules
- * Param:
- *	- Parser data
- * Return:
- *	- Void (procedure)
- ***********************************************************
- */
-/*
-void printBNFData(ParserData psData) {
-}
-*/
 void printBNFData(ParserData psData) {
 	/* Print Parser statistics */
 	printf("Statistics:\n");
@@ -661,16 +461,6 @@ void save_statement() {
 	// matchToken(EOS_T, NO_ATTR);
 	printf("%s%s\n", STR_LANGNAME, ": Save statement parsed");
 }
-
-// void dynamic_assignment() {
-// 	psData.parsHistogram[BNF_dynamic_assignment]++;
-// 	type();
-// 	id();
-// 	matchToken(ASSIGN_T, NO_ATTR);
-// 	operation_expr();
-// 	matchToken(EOS_T, NO_ATTR);
-// 	printf("%s%s\n", STR_LANGNAME, ": Dynamic assignment parsed");
-// }
 
 void operation_expr() {
 	psData.parsHistogram[BNF_operation_expr]++;
