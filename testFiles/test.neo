@@ -29,3 +29,8 @@ embedding input_embed = embed(translated)
 
 stream_out(translated, console)
 
+
+# for test purposes #
+
+number x = 2 + 4 * 3
+text greeting = "Hi Mom"

@@ -112,7 +112,7 @@ enum KEYWORDS {
 };
 
 /* TO_DO: Define the number of BNF rules */
-#define NUM_BNF_RULES 18
+#define NUM_BNF_RULES 21
 
 /* Parser */
 typedef struct parserData {
@@ -139,7 +139,6 @@ enum BNF_RULES {
 
 
 	BNF_statements,		                /* 02 <statement> ::= <assignment>
-	                                    					 | <assignment>
 	                                    					 | <model_context_block>
 	                                    					 | <stream_expr>
 	                                    					 | <cache_statement>
@@ -184,6 +183,13 @@ enum BNF_RULES {
 	BNF_id,                             /* 16 <id> ::= valid identifier (excluding reserved keywords) */
 
 	BNF_comment,                        /* 17 <comment> ::= "#" { any character }  "#" */
+
+	BNF_arith_expr,                     /* 18 <arithmetic_expr> ::= <term> { ("+" | "-") <term> } */
+
+	BNF_term,                           /* 19 <term> ::= <factor> { ("*" | "/") <factor> } */
+
+	BNF_factor,                         /* 20 <factor> ::= <id> | <number> | <bigNumber> | "(" <arith_expr> ")" */
+
 };
 
 
@@ -208,6 +214,10 @@ static char* BNFStrTable[NUM_BNF_RULES] = {
 	"BNF_format",
 	"BNF_id",
 	"BNF_comment",
+	"BNF_arith_expr",
+	"BNF_term",
+	"BNF_factor",
+
 };
 
 /* TO_DO: Place ALL non-terminal function declarations */
@@ -228,6 +238,9 @@ void dest_expr();
 void type();
 void format();
 void id();
+void arith_expr();
+void term();
+void factor();
 
 
 boolean isDataType(TokenAttribute t) ;
