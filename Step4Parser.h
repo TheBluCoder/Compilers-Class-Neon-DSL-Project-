@@ -139,14 +139,16 @@ enum BNF_RULES {
 
 
 	BNF_statements,		                /* 02 <statement> ::= <assignment>
-	                                    					 | <model_context_block>
+															 | <model_context_block>
+	                                    					 | <comment>
 	                                    					 | <stream_expr>
 	                                    					 | <cache_statement>
 	                                    					 | <save_statement>
 	                                    					 | <load_model> */
 
-	BNF_assignment,                    /*  03 <declaration> ::= <type> <id> "=" <load_expr>
-	                                  						 | <type> <id> { "," <id> } "=" <multi_load_expr> */
+	BNF_assignment,                    /*  03 <assignment> ::= <type> <id> "=" ( <load_expr> | <operation_expr> 
+																	| <stream_expr>  | <arith_expr> | STR_T | <id>) 	*/
+
 
 	BNF_load_expr,                      /* 04 <load_expr> ::= "file" "(" <string> ")"
 	                                  						 | "image" "(" <string> "," <img_format> ")"

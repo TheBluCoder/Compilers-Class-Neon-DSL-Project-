@@ -273,7 +273,8 @@ void comment() {
 ************************************************************
 * Function: statements
 * Purpose : Parses a sequence of statements until end of file.
-* BNF     : <statements> -> { <assignment> | <stream_expr> | <cache_statement> | <save_statement> | <load_model> }
+* BNF     : <statements> -> { <assignment> | <stream_expr> | <cache_statement> | <save_statement>
+*							| <load_model> | <EOS>         | <comment>         | <model_context_block>}
 *           FIRST(<statements>) = {KW_T, ...}
 * Params  : None
 * Returns : void
@@ -292,7 +293,6 @@ void statements() {
 				matchToken(EOS_T, NO_ATTR); // Skip end of statement
 				break;
 			case KW_T:
-
 				switch (lookahead.attribute.codeType) {
 				case KW_load:
 						load_model(); // Parse load model statement
@@ -823,4 +823,5 @@ void factor() {
         syncErrorHandler(lookahead.code);
     }
 }
+
 
