@@ -102,17 +102,17 @@ enum KEYWORDS {
 	KW_image,		/* 19 */
 	KW_text,		/* 20 */
 	KW_media,		/* 21 */
-	KW_number,
-	KW_bigNumber,
-	KW_audio,
-	KW_console,
-	KW_file,
-	KW_embedding,
-	KW_embed,
+	KW_number,		/* 22 */
+	KW_bigNumber,  /* 23 */
+	KW_audio,		/*24 */
+	KW_console,		/*25*/
+	KW_file,		/* 26 */
+	KW_embedding,  /* 27 */
+	KW_embed,		/* 28 */
 };
 
 /* TO_DO: Define the number of BNF rules */
-#define NUM_BNF_RULES 25
+#define NUM_BNF_RULES 18
 
 /* Parser */
 typedef struct parserData {
@@ -132,137 +132,99 @@ void syncErrorHandler(int);
 void printError();
 void printBNFData(ParserData psData);
 
-/* List of BNF statements */
-// enum BNF_RULES {
-// 	BNF_error,										/*  0: Error token */
-// 	BNF_codeSession,								/*  1 */
-// 	BNF_comment,									/*  2 */
-// 	BNF_dataSession,								/*  3 */
-// 	BNF_optVarListDeclarations,						/*  4 */
-// 	BNF_optionalStatements,							/*  5 */
-// 	BNF_outputStatement,							/*  6 */
-// 	BNF_outputVariableList,							/*  7 */
-// 	BNF_program,									/*  8 */
-// 	BNF_statement,									/*  9 */
-// 	BNF_statements,									/* 10 */
-// 	BNF_statementsPrime,							/* 11 */
-// 	BNF_optParams,									/* 12 */
-// 	BNF_returnStatement								/* 13 */
-// };
-
 
 enum BNF_RULES {
-	BNF_,				                /*  0: Error rule */
-	BNF_program,		                /* <program> ::= { <statement> } */
+	BNF_,				                /* 00: Error rule */
+	BNF_program,		                /* 01 <program> ::= { <statement> } */
 
 
-	BNF_statement,		                /* <statement> ::= <static_assignment>
-	                                    				 | <assignment>
-	                                    				 | <model_block>
-	                                    				 | <stream_statement>
-	                                    				 | <cache_statement>
-	                                    				 | <save_statement>
-	                                    				 | <load_model> */
+	BNF_statements,		                /* 02 <statement> ::= <assignment>
+	                                    					 | <assignment>
+	                                    					 | <model_context_block>
+	                                    					 | <stream_expr>
+	                                    					 | <cache_statement>
+	                                    					 | <save_statement>
+	                                    					 | <load_model> */
 
-	BNF_static_assignment,                    /* <declaration> ::= <type> <id> "=" <load_expr>
+	BNF_assignment,                    /*  03 <declaration> ::= <type> <id> "=" <load_expr>
 	                                  						 | <type> <id> { "," <id> } "=" <multi_load_expr> */
 
-	BNF_dynamic_assignment,                     /* <assignment> ::= <type> <id> "=" <operation_expr> */
-
-	BNF_load_expr,                      /* <load_expr> ::= "file" "(" <string> ")"
+	BNF_load_expr,                      /* 04 <load_expr> ::= "file" "(" <string> ")"
 	                                  						 | "image" "(" <string> "," <img_format> ")"
 	                                  						 | "audio" "(" <string> "," <audio_format> ")"
 	                                  						 | "doc" "(" <string> "," <doc_format> ")"
 	                                  						 | "media" "(" <string> "," <doc_format> ")" */
 
-	BNF_multi_load_expr,                /* <multi_load_expr> ::= "media" "(" <string> "," <doc_format> ")" */
+	BNF_model_context_block,            /* 05 <model_context_block> ::= "using" <id> ":" <model_context_body> */
 
-	BNF_model_block,                    /* <model_block> ::= "using" <id> ":" <model_body> */
+	BNF_model_context_body,             /* 06 <model_context_body> ::= { <static assignment> | <operation_expr> | <dynamic assignment>
+															 | <cache statement>   | <save statement> } */
 
-	BNF_model_body,                     /* <model_body> ::= { <static assignment> | <operation_expr> | <dynamic assignment> } */
-
-	// BNF_context_block,                  /* <context_block> ::= "using" <id> ":" <operation_expr> */
-
-	BNF_operation_expr,                 /* <operation_expr> ::= "ask" "(" <string> [ "," <id> ] ")"
+	BNF_operation_expr,                 /* 07 <operation_expr> ::= "ask" "(" <string> [ "," <id> ] ")"
 	                                  						 | "generate" "(" <string> [ "," <id> ] ")" */
 
-	BNF_cache_statement,                /* <cache_statement> ::= "cache" "(" <id> ")"
+	BNF_cache_statement,                /* 08 <cache_statement> ::= "cache" "(" <id> ")"
 	                                  						 | "cache" "(" <id> "," <id> ")" */
 
-	BNF_save_statement,                 /* <save_statement> ::= "save" "(" <id> "," <string> ")" */
+	BNF_save_statement,                 /* 09 <save_statement> ::= "save" "(" <id> "," <string> ")" */
 
-	BNF_stream_statement,               /* <stream_statement> ::= "stream_in" "(" <source_expr> "," <format> ")"
+	BNF_stream_expr,                    /* 10 <stream_expr> ::= "stream_in" "(" <source_expr> "," <format> ")"
 	                                  						 | "stream_out" "(" <id> "," <dest_expr> ")" */
 
-	BNF_load_model,                     /* <load_model> ::= "load" "model" <id> */
+	BNF_load_model,                     /* 11 <load_model> ::= "load" "model" <id> */
 
-	BNF_source_expr,                    /* <source_expr> ::= <id> | <string> */
+	BNF_source_expr,                    /* 12 <source_expr> ::= <id> | <string> */
 
-	BNF_dest_expr,                      /* <dest_expr> ::= "console" | <string> */
+	BNF_dest_expr,                      /* 13 <dest_expr> ::= "console" | <string> */
 
-	BNF_type,                           /* <type> ::= "text" | "image" | "audio" | "doc" | "media" | "stream" | "embedding" */
+	BNF_type,                           /* 14 <type> ::= "text" | "image" | "audio" | "doc" | "media" | "stream" | "embedding" */
 
-	BNF_format,                         /* <format> ::= <img_format> | <audio_format> | <doc_format> */
+	BNF_format,                         /* 15 <format> ::= <img_format> | <audio_format> | <doc_format> */
 
-	BNF_img_format,                     /* <img_format> ::= "PNG" | "JPEG" | "JPG" */
+	BNF_id,                             /* 16 <id> ::= valid identifier (excluding reserved keywords) */
 
-	BNF_audio_format,                   /* <audio_format> ::= "WAV" | "MP3" */
-
-	BNF_doc_format,                     /* <doc_format> ::= "PDF" | "DOCX" */
-
-	BNF_id,                             /* <id> ::= valid identifier (excluding reserved keywords) */
-
-	BNF_text   ,                         /* <text> ::= string literal (e.g., "Hello world") */
-
-	BNF_comment,                        /* <comment> ::= "#" { any character }  "#" */
+	BNF_comment,                        /* 17 <comment> ::= "#" { any character }  "#" */
 };
 
 
 
 /* TO_DO: Define the list of keywords */
 static char* BNFStrTable[NUM_BNF_RULES] = {
-	"BNF_error",
-	"BNF_program",
-	"BNF_statement",
-	"BNF_static_assignment",
-	"BNF_dynamic_assignment",
-	"BNF_load_expr",
-	"BNF_multi_load_expr",
-	"BNF_model_block",
-	"BNF_model_body",
-	// "BNF_context_block",
-	"BNF_operation_expr",
-	"BNF_cache_statement",
-	"BNF_save_statement",
-	"BNF_stream_statement",
+	"BNF_error",					/* 00 */
+	"BNF_program",					/* 01 */
+	"BNF_statements",				/* 02 */
+	"BNF_assignment",				/* 03 */
+	"BNF_load_expr",				/* 04 */
+	"BNF_model_context_block",		/* 05 */
+	"BNF_model_context_body",		/* 06 */
+	"BNF_operation_expr",			/* 07 */
+	"BNF_cache_statement",			/* 08 */
+	"BNF_save_statement",			/* 09 */
+	"BNF_stream_expr",				/* 10 */
 	"BNF_load_model",
 	"BNF_source_expr",
 	"BNF_dest_expr",
 	"BNF_type",
 	"BNF_format",
-	"BNF_img_format",
-	"BNF_audio_format",
-	"BNF_doc_format",
 	"BNF_id",
-	"BNF_text",
 	"BNF_comment",
 };
 
 /* TO_DO: Place ALL non-terminal function declarations */
 void program();
-void statement();
+void statements();
 void comment();
-void static_assignment();
-void dynamic_assignment();
+void assignment();
+// void dynamic_assignment();
 void load_expr();
 void multi_load_expr();
-void model_block();
-void model_body();
+void model_context_block();
+void model_context_body();
 // void context_block();
 void operation_expr();
 void cache_statement();
 void save_statement();
-void stream_statement();
+void stream_expr();
 void load_model();
 void source_expr();
 void dest_expr();

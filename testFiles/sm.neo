@@ -1,7 +1,1 @@
-# this is a comment #
-
-load model "gemini"
-load model "open-ai"
-load model "phi-4"
-
-text x, image y = image("some img", PDF)
+text doc_embed = ask("tell me about the main character", document_text)

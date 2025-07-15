@@ -8,16 +8,16 @@ image illustrations = doc("paper.pdf", PDF)
 text summary = generate("summarize this document", document_text)
 
 using "gemini":
-    text extracted_text = ask("What does this image say?", illustrations)
-    cache(extracted_text)
+	text extracted_text = ask("What does this image say?", illustrations)
+	cache(extracted_text)
 
 using "claude":
-    text haiku = generate("Write a haiku about the above", extracted_text)
-    cache(haiku)
+	text haiku = generate("Write a haiku about the above", extracted_text)
+	cache(haiku)
 
 using "openai-tts":
-    audio spoken = generate("Convert haiku to audio", haiku)
-    save(spoken, "haiku.wav")
+	audio spoken = generate("Convert haiku to audio", haiku)
+	save(spoken, "haiku.wav")
 
 stream_out(haiku, console)
 

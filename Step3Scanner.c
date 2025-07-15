@@ -159,7 +159,7 @@ Token tokenizer(void) {
 			return currentToken;
 		}
 
-	} while (c == SPC_CHR || c == TAB_CHR);
+	} while (c == SPC_CHR);
 
 	/* ------------------------------------------------------------------------
 		Part 1: Implementation of token driven scanner.
@@ -173,6 +173,12 @@ Token tokenizer(void) {
 	case NWL_CHR:
 		line++;
 		currentToken.code = EOS_T;
+		scData.scanHistogram[currentToken.code]++;
+		free(lexeme);
+		return currentToken;
+
+	case TAB_CHR:
+		currentToken.code= TAB_T;
 		scData.scanHistogram[currentToken.code]++;
 		free(lexeme);
 		return currentToken;
@@ -696,6 +702,10 @@ void printToken(Token t) {
 
 	case INTL_T:
 		printf("INTL_T\t\t%d\n", t.attribute.intValue);
+		break;
+
+	case TAB_T:
+		printf("TAB_T\n");
 		break;
 
 	default:

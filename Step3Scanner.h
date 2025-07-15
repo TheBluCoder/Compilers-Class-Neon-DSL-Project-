@@ -71,7 +71,7 @@
 #define RTE_CODE 1  /* Value for run-time error */
 
 /* TO_DO: Define the number of tokens */
-#define NUM_TOKENS 17
+#define NUM_TOKENS 18
 
 /* TO_DO: Define Token codes - Create your token classes */
 enum TOKENS {
@@ -92,6 +92,7 @@ enum TOKENS {
 	COLON_T,	/* 14: Colon token */
 	ARIT_OP_T,	/* 15: Arithmetic operator token */
 	FLOAT_T,	/* 16: Floating-point literal token */
+	TAB_T,		/* 17: Tab token */
 };
 
 /* TO_DO: Define the list of keywords */
@@ -113,6 +114,7 @@ static char* tokenStrTable[NUM_TOKENS] = {
 	"COLON_T",
 	"ARIT_T",
 	"FLOAT_T",
+	"TAB_T",
 };
 
 /* TO_DO: Operators token attributes */
@@ -302,7 +304,7 @@ Language keywords
 */
 
 /* TO_DO: Define the number of Keywords from the language */
-#define KWT_SIZE 28
+#define KWT_SIZE 29
 
 /* TO_DO: Define the list of keywords */
 static char* keywordTable[KWT_SIZE] = {
@@ -334,6 +336,7 @@ static char* keywordTable[KWT_SIZE] = {
 	"console", /* KW25 */
 	"file",		/* KW26 */
 	"embedding", /* KW27 */
+	"embed", /*KW28*/
 };
 
 /* Defines the number of Formats from the language */
