@@ -449,6 +449,9 @@ void assignment() {
 	
 	switch (lookahead.code) {
 		case INTL_T:
+			//create another level of abstraction with int
+			// it does a match token , then a switch case to see if we are dealing with relational
+			//or arithmetic operator, if relational, call bool expression, else go arith way
 			arith_expr();
 			break;
 		case KW_T:
