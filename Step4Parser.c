@@ -310,6 +310,7 @@ void statements() {
 				case KW_embedding:
 				case KW_number:
 				case KW_bigNumber:
+				case KW_boolean:
 						assignment(); // Parse assignment
 						break;
 				case KW_using:
@@ -381,8 +382,9 @@ void load_model() {
 ************************************************************
 */
 int isDatatype(const TokenAttribute t) {
-	const char* datatypes[10] = {"text", "image", "audio", "embedding", "number", "bigNumber", "file","media","doc","embed"};
-	for (int i = 0; i < 9; i++) {
+	const int dsize = 11;
+	const char* datatypes[11] = {"text", "image", "audio", "embedding", "number", "bigNumber", "file","media","doc","embed","boolean"};
+	for (int i = 0; i< dsize; i++) {
 		if (strcmp(datatypes[i], keywordTable[t.codeType]) == 0) {
 			return t.codeType;
 		}
@@ -468,6 +470,10 @@ void assignment() {
 				case KW_stream_out:
 						stream_expr(); // Parse stream expression
 						break;
+				case KW_True:
+				case KW_False:
+					bool_dtype();
+					break;
 				default:
 						syncErrorHandler(lookahead.code); // Handle unexpected token
 						break;
@@ -822,6 +828,23 @@ void factor() {
     } else {
         syncErrorHandler(lookahead.code);
     }
+}
+
+void bool_dtype() {
+	//boolean expression
+	switch (lookahead.attribute.codeType) {
+		case KW_True:
+			psData.parsHistogram[BNF_bool_dtype]++;
+			matchToken(lookahead.code, KW_True); // Match 'True' keyword
+			break;
+		case KW_False:
+			psData.parsHistogram[BNF_bool_dtype]++;
+			matchToken(lookahead.code, KW_False); // Match 'False' keyword
+			break;
+		default:
+			syncErrorHandler(lookahead.code); // Handle unexpected token
+			break;
+	}
 }
 
 

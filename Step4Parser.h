@@ -109,10 +109,11 @@ enum KEYWORDS {
 	KW_file,		/* 26 */
 	KW_embedding,  /* 27 */
 	KW_embed,		/* 28 */
+	KW_boolean
 };
 
 /* TO_DO: Define the number of BNF rules */
-#define NUM_BNF_RULES 21
+#define NUM_BNF_RULES 22
 
 /* Parser */
 typedef struct parserData {
@@ -191,6 +192,7 @@ enum BNF_RULES {
 	BNF_term,                           /* 19 <term> ::= <factor> { ("*" | "/") <factor> } */
 
 	BNF_factor,                         /* 20 <factor> ::= <id> | <number> | <bigNumber> | "(" <arith_expr> ")" */
+	BNF_bool_dtype,                        /* 21 <boolean> ::= "True" | "False" */
 
 };
 
@@ -219,6 +221,7 @@ static char* BNFStrTable[NUM_BNF_RULES] = {
 	"BNF_arith_expr",
 	"BNF_term",
 	"BNF_factor",
+	"BNF_bool_dtype"
 
 };
 
@@ -243,7 +246,8 @@ void id();
 void arith_expr();
 void term();
 void factor();
+void bool_dtype();
 
 
-boolean isDataType(TokenAttribute t) ;
+int isDataType(TokenAttribute t) ;
 #endif
