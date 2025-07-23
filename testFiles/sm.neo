@@ -1,1 +1,12 @@
-boolean isBoy = True
+# for test purposes #
+
+number x = 2 + 4
+number y = x * 2
+number z = (x + y) * (x - y)
+text langName = "Neon"
+
+output(x, console)
+output(y,console)
+output(langName, console)
+output("Neon is Alive", console)
+

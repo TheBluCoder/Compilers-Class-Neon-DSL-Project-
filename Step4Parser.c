@@ -273,7 +273,7 @@ void comment() {
 ************************************************************
 * Function: statements
 * Purpose : Parses a sequence of statements until end of file.
-* BNF     : <statements> -> { <assignment> | <stream_expr> | <cache_statement> | <save_statement>
+* BNF     : <statements> -> { <assignment> | <io_expr> | <cache_statement> | <save_statement>
 *							| <load_model> | <EOS>         | <comment>         | <model_context_block>}
 *           FIRST(<statements>) = {KW_T, ...}
 * Params  : None
@@ -299,7 +299,8 @@ void statements() {
 						break;
 				case KW_stream_in:
 				case KW_stream_out:
-						stream_expr(); // Parse stream expression
+				case KW_output:
+						io_expr(); // Parse stream expression
 						break;
 				case KW_image:
 				case KW_text:
@@ -394,17 +395,17 @@ int isDatatype(const TokenAttribute t) {
 
 /*
 ************************************************************
-* Function: stream_expr
+* Function: io_expr
 * Purpose : Parses a stream expression (stream_in or stream_out).
-* BNF     : <stream_expr> -> stream_in ( <source_expr> , <format> )
+* BNF     : <io_expr> -> stream_in ( <source_expr> , <format> )
 *                        |  stream_out ( <id> , <dest_expr> )
-*           FIRST(<stream_expr>) = {KW_stream_in, KW_stream_out}
+*           FIRST(<io_expr>) = {KW_stream_in, KW_stream_out}
 * Params  : None
 * Returns : void
 ************************************************************
 */
-void stream_expr() {
-	psData.parsHistogram[BNF_stream_expr]++;
+void io_expr() {
+	psData.parsHistogram[BNF_io_expr]++;
 	switch (lookahead.attribute.codeType) {
 		case KW_stream_in:
 			matchToken(KW_T, KW_stream_in); // Match 'stream_in' keyword
@@ -422,11 +423,19 @@ void stream_expr() {
 			dest_expr(); // Parse destination expression
 			matchToken(RPR_T, NO_ATTR); // Match ')'
 			break;
+		case KW_output:
+			matchToken(KW_T, KW_output); // Match 'output' keyword
+			matchToken(LPR_T, NO_ATTR); // Match '('
+			id(); // Parse id
+			matchToken(COM_T, NO_ATTR); // Match ','
+			dest_expr(); // Parse destination expression
+			matchToken(RPR_T, NO_ATTR); // Match ')'
+			break;
 		default:
 			syncErrorHandler(lookahead.code); // Handle unexpected token
 			break;
 	}
-	printf("%s%s\n", STR_LANGNAME, ": Stream expression parsed");
+	printf("%s%s\n", STR_LANGNAME, ": io expression parsed");
 }
 
 /*
@@ -435,7 +444,7 @@ void stream_expr() {
 * Purpose : Parses an assignment statement for various datatypes and operations.
 * BNF     : <assignment> -> <type> <id> = <load_expr>
 *                        |  <type> <id> = <operation_expr>
-*                        |  <type> <id> = <stream_expr>
+*                        |  <type> <id> = <io_expr>
 *           FIRST(<assignment>) = {KW_text, KW_image, ...}
 * Params  : None
 * Returns : void
@@ -471,7 +480,7 @@ void assignment() {
 						break;
 				case KW_stream_in:
 				case KW_stream_out:
-						stream_expr(); // Parse stream expression
+						io_expr(); // Parse stream expression
 						break;
 				case KW_True:
 				case KW_False:

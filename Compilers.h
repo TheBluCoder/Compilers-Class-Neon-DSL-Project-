@@ -163,6 +163,7 @@ int main1Coder	(int argc, text* argv);
 int main2Reader(int argc, char** argv);
 int main3Scanner(int argc, char** argv);
 int main4Parser(int argc, char** argv);
+int main5Writer(int argc, char** argv);
 void printLogo();
 void errorPrint(text fmt, ...);
 

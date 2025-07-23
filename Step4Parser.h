@@ -109,7 +109,7 @@ enum KEYWORDS {
 	KW_file,		/* 26 */
 	KW_embedding,  /* 27 */
 	KW_embed,		/* 28 */
-	KW_boolean
+	KW_boolean,
 };
 
 /* TO_DO: Define the number of BNF rules */
@@ -142,13 +142,13 @@ enum BNF_RULES {
 	BNF_statements,		                /* 02 <statement> ::= <assignment>
 															 | <model_context_block>
 	                                    					 | <comment>
-	                                    					 | <stream_expr>
+	                                    					 | <io_expr>
 	                                    					 | <cache_statement>
 	                                    					 | <save_statement>
 	                                    					 | <load_model> */
 
 	BNF_assignment,                    /*  03 <assignment> ::= <type> <id> "=" ( <load_expr> | <operation_expr> 
-																	| <stream_expr>  | <arith_expr> | STR_T | <id>) 	*/
+																	| <io_expr>  | <arith_expr> | STR_T | <id>) 	*/
 
 
 	BNF_load_expr,                      /* 04 <load_expr> ::= "file" "(" <string> ")"
@@ -170,8 +170,10 @@ enum BNF_RULES {
 
 	BNF_save_statement,                 /* 09 <save_statement> ::= "save" "(" <id> "," <string> ")" */
 
-	BNF_stream_expr,                    /* 10 <stream_expr> ::= "stream_in" "(" <source_expr> "," <format> ")"
-	                                  						 | "stream_out" "(" <id> "," <dest_expr> ")" */
+	BNF_io_expr,                    /* 10 <io_expr> ::= "stream_in" "(" <source_expr> "," <format> ")"
+	                                  						 | "stream_out" "(" <id> "," <dest_expr> ")"
+	                                  						 | "output" "( <id> "," <dest_expr> ")"
+	                                  						 */
 
 	BNF_load_model,                     /* 11 <load_model> ::= "load" "model" <id> */
 
@@ -210,7 +212,7 @@ static char* BNFStrTable[NUM_BNF_RULES] = {
 	"BNF_operation_expr",			/* 07 */
 	"BNF_cache_statement",			/* 08 */
 	"BNF_save_statement",			/* 09 */
-	"BNF_stream_expr",				/* 10 */
+	"BNF_io_expr",				/* 10 */
 	"BNF_load_model",
 	"BNF_source_expr",
 	"BNF_dest_expr",
@@ -236,7 +238,7 @@ void model_context_body();
 void operation_expr();
 void cache_statement();
 void save_statement();
-void stream_expr();
+void io_expr();
 void load_model();
 void source_expr();
 void dest_expr();
