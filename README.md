@@ -31,10 +31,16 @@ Neon is a simple programming language with the following features:
 
 ### Syntax Examples
 ```neon
+load model 'openai-tts'
+
 # Variable declarations
 number x = 2 + 4
 number y = x * 2
 text langName = "Neon"
+
+using 'openai-tts':
+   text someText = "This is some text"
+   audio sample = generate("", someText)
 
 # Output statements
 output(x, console)
@@ -105,7 +111,7 @@ make
 - `Step2Reader.c/h` - File reading and buffer management
 - `Step3Scanner.c/h` - Lexical analysis and tokenization
 - `Step4Parser.c/h` - Syntax analysis and parsing
-- `Step5Writer.c/h` - **Code generation and execution**
+- `Step5Writer.c/h` - **Code execution simulation**
 
 ### Main Entry Points
 - `Main1Coder.c` - Coder phase entry point
