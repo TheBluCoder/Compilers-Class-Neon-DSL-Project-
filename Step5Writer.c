@@ -68,7 +68,11 @@ int var_count = 0;
 int initial_phase = 1; // Flag to track the initial phase
 char output_buffer[MAX_EXPR_LEN * 10] = { 0 }; // Buffer to store write output
 
-/* Finds variables */
+/**
+ * Finds a variable in the variables array by name
+ * @param name The name of the variable to search for
+ * @return Index of the variable if found, -1 if not found
+ */
 int find_variable(const char* name) {
     int i = 0;
     for (i = 0; i < var_count; ++i) {
@@ -79,7 +83,11 @@ int find_variable(const char* name) {
     return -1;
 }
 
-/* Assign string variable */
+/**
+ * Assigns a string value to a variable
+ * @param name The name of the variable
+ * @param value The string value to assign
+ */
 void assign_string_variable(const char* name, const char* value) {
     int idx = find_variable(name);
     if (idx == -1) {
@@ -91,7 +99,11 @@ void assign_string_variable(const char* name, const char* value) {
     variables[idx].value.str_value[sizeof(variables[idx].value.str_value) - 1] = EOS;
 }
 
-/* Gets string variable */
+/**
+ * Gets the string value of a variable
+ * @param name The name of the variable
+ * @return The string value of the variable, or empty string if not found
+ */
 const char* get_string_value(const char* name) {
     int idx = find_variable(name);
     if (idx != -1 && variables[idx].type == STRING) {
@@ -101,14 +113,25 @@ const char* get_string_value(const char* name) {
 }
 
 /* Write output */
-/* Helper function to skip whitespace */
+/**
+ * Helper function to skip whitespace characters
+ * @param ptr Pointer to the current position in the string
+ */
 void skip_whitespace(char** ptr) {
     while (isspace(**ptr)) {
         (*ptr)++;
     }
 }
 
-/* Helper function to check if current position starts with target word and clear buffer if not */
+/**
+ * Helper function to check if current position starts with target word and clear buffer if not
+ * @param wrd Pointer to the current word position
+ * @param targetWord The target word to check for
+ * @param targetWordLen Length of the target word
+ * @param buffer The buffer to clear if target word not found
+ * @param bufferSize Size of the buffer
+ * @return 1 if target word found, 0 otherwise
+ */
 int check_console_and_clear_buffer(char* wrd, const char* targetWord, size_t targetWordLen, char* buffer, size_t bufferSize) {
     skip_whitespace(&wrd);
     if (strncmp(wrd, targetWord, targetWordLen) != 0) {
@@ -118,6 +141,10 @@ int check_console_and_clear_buffer(char* wrd, const char* targetWord, size_t tar
     return 1; // Is console
 }
 
+/**
+ * Handles write operations by parsing expressions and outputting to console or buffer
+ * @param expression The expression to process for writing
+ */
 void handle_write(char* expression) {
     char buffer[MAX_EXPR_LEN] = { 0 };
     char * targetWord = "console";
@@ -194,7 +221,10 @@ void handle_write(char* expression) {
     // printf("%s", output_buffer); // Print the buffered write output
 }
 
-/* Calculate expression */
+/**
+ * Calculates and processes expressions including assignments and write operations
+ * @param expression The expression to calculate and process
+ */
 void calculate(char* expression) {
     char var_name[32] = { 0 };
     if (strchr(expression, EQUALS)) {
@@ -304,7 +334,12 @@ void calculate(char* expression) {
 //     }
 // }
 
-/* Split lines into components */
+/**
+ * Splits content into individual lines
+ * @param content The content to split into lines
+ * @param lineCount Pointer to store the number of lines
+ * @return Array of strings representing each line
+ */
 char** splitIntoLines(const char* content, int* lineCount) {
     char** lines = malloc(MAX_LINES * sizeof(char*));
     if (!lines) {
@@ -356,7 +391,11 @@ char** splitIntoLines(const char* content, int* lineCount) {
     return lines;
 }
 
-/* Free lines */
+/**
+ * Frees memory allocated for lines array
+ * @param lines Array of line strings to free
+ * @param lineCount Number of lines in the array
+ */
 void freeLines(char** lines, int lineCount) {
     int i = 0;
     for (i = 0; i < lineCount; i++) {
@@ -365,7 +404,10 @@ void freeLines(char** lines, int lineCount) {
     free(lines);
 }
 
-/* Process content */
+/**
+ * Processes file content by splitting into lines and calculating each expression
+ * @param fileContent The content of the file to process
+ */
 void process_content(char* fileContent) {
     int lineCount = 0;
     char** lines = splitIntoLines(fileContent, &lineCount);
@@ -400,6 +442,11 @@ void process_content(char* fileContent) {
     freeLines(lines, lineCount);
 }
 
+/**
+ * Assigns a numeric value to a variable
+ * @param name The name of the variable
+ * @param value The numeric value as a string
+ */
 void assign_numeric_variable(const char* name, const char* value) {
     int idx = find_variable(name);
     if (idx == -1) {
@@ -410,6 +457,11 @@ void assign_numeric_variable(const char* name, const char* value) {
     variables[idx].value.num_value = strtod(value, NULL);
 }
 
+/**
+ * Assigns the result of a numeric expression to a variable
+ * @param name The name of the variable
+ * @param value The expression to evaluate
+ */
 void assign_numeric_expression(const char* name, const char* value) {
     int idx = find_variable(name);
     if (idx == -1) {
@@ -420,7 +472,11 @@ void assign_numeric_expression(const char* name, const char* value) {
     variables[idx].value.num_value = evaluate_expression(value);
 }
 
-/* Helper function to evaluate numeric expressions */
+/**
+ * Helper function to evaluate numeric expressions
+ * @param expr The expression string to evaluate
+ * @return The result of the expression evaluation
+ */
 double evaluate_expression(const char* expr) {
     char* expression = _strdup(expr);
     if (!expression) return 0.0;
@@ -441,7 +497,11 @@ double evaluate_expression(const char* expr) {
     return result;
 }
 
-/* Parse expression with operator precedence */
+/**
+ * Parse expression with operator precedence (addition and subtraction)
+ * @param expr Pointer to the expression string
+ * @return The result of the expression
+ */
 double parse_expression(char** expr) {
     double left = parse_term(expr);
     
@@ -460,7 +520,11 @@ double parse_expression(char** expr) {
     return left;
 }
 
-/* Parse term (multiplication and division) */
+/**
+ * Parse term (multiplication and division)
+ * @param expr Pointer to the expression string
+ * @return The result of the term
+ */
 double parse_term(char** expr) {
     double left = parse_factor(expr);
     
@@ -483,7 +547,11 @@ double parse_term(char** expr) {
     return left;
 }
 
-/* Parse factor (numbers, variables, and parenthesized expressions) */
+/**
+ * Parse factor (numbers, variables, and parenthesized expressions)
+ * @param expr Pointer to the expression string
+ * @return The result of the factor
+ */
 double parse_factor(char** expr) {
     skip_whitespace(expr);
     
@@ -527,6 +595,11 @@ double parse_factor(char** expr) {
     return 0.0;
 }
 
+/**
+ * Assigns a boolean value to a variable
+ * @param name The name of the variable
+ * @param value The boolean value as a string ("true" or "false")
+ */
 void assign_boolean_variable(const char* name, const char* value) {
     int idx = find_variable(name);
     if (idx == -1) {
@@ -537,6 +610,11 @@ void assign_boolean_variable(const char* name, const char* value) {
     variables[idx].value.bool_value = (strcmp(value, "true") == 0);
 }
 
+/**
+ * Assigns the value of one variable to another variable
+ * @param name The name of the target variable
+ * @param value The name of the source variable
+ */
 void assign_variable_to_variable(const char* name, const char* value) {
     int idx = find_variable(name);
     char errorMsg[128];
