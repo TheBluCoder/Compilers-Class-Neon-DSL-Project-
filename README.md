@@ -14,7 +14,7 @@ The project is organized into multiple phases, each corresponding to a different
 - **Assignment 2**: Reader (Step 2) - File reading and buffer management
 - **Assignment 3**: Scanner (Step 3) - Lexical analysis and tokenization
 - **Assignment 4**: Parser (Step 4) - Syntax analysis and parsing
-- **Assignment 5**: Writer (Step 5) - **Complete frontend compiler** with code generation and execution
+- **Assignment 5**: Writer (Step 5) - **Complete frontend compiler** with simulated execution of variable assignment, console output , arithmetic expressions
 
 ## Current Status
 
