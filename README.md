@@ -28,6 +28,9 @@ Neon is a simple programming language with the following features:
 - `number` - Numeric values (supports arithmetic operations)
 - `text` - String literals
 - `boolean` - True/False values
+- `image` - image datatype
+- `audio` - audio datatype
+- `embedding` - vector embeddings 
 
 ### Syntax Examples
 ```neon
