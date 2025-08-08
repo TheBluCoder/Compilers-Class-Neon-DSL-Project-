@@ -31,20 +31,43 @@ Neon is a simple programming language with the following features:
 
 ### Syntax Examples
 ```neon
-load model 'openai-tts'
+load model "gemini"
+load model "claude"
+load model "openai-tts"
+load model "openai-embeddings"
 
-# Variable declarations
-number x = 2 + 4
-number y = x * 2
-text langName = "Neon"
+text document_text = doc("paper.pdf", PDF)
+image illustrations = doc("paper.pdf", PDF)
+text summary = generate("summarize this document", document_text)
 
-using 'openai-tts':
-   text someText = "This is some text"
-   audio sample = generate("", someText)
+using "gemini":
+	text extracted_text = ask("What does this image say?", illustrations)
+	cache(extracted_text)
 
-# Output statements
-output(x, console)
-output("Hello World", console)
+using "claude":
+	text haiku = generate("Write a haiku about the above", extracted_text)
+	cache(haiku)
+
+using "openai-tts":
+	audio spoken = generate("Convert haiku to audio", haiku)
+	save(spoken, "haiku.wav")
+
+stream_out(haiku, console)
+
+audio mic_input = stream_in(mic, WAV)
+text translated = generate("Translate spoken audio to French", mic_input)
+
+embedding doc_embed = embed(document_text)
+embedding input_embed = embed(translated)
+
+stream_out(translated, console)
+
+
+# for test purposes #
+
+number x = 2 + 4 * 3
+text greeting = "Hi Mom"
+
 ```
 
 ### Supported Operations
